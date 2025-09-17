@@ -94,7 +94,7 @@ Keep in mind that non-Markovian simulations are only available for reaction chan
 
 ### Reproducing Results from our publication
 
-[1] Pélissier, A, Phan, M, et al. "Unifying non-Markovian Dynamics and Agent Heterogeneity in Scalable Stochastic Simulation". *Submitted to Proceedings of the National Academy of Sciences* (2022) [[Preprint]](https://arxiv.org/abs/2212.05059)
+[1] Pélissier, A, Phan, M, et al. "Unifying non-Markovian Dynamics and Agent Heterogeneity in Scalable Stochastic Simulation". *Under review* (2025) [[Preprint]](https://arxiv.org/abs/2212.05059)
 
 The models corresponding to the three applications presented in the paper are available at:
 
