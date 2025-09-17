@@ -99,9 +99,7 @@ Keep in mind that non-Markovian simulations are only available for reaction chan
 The models corresponding to the three applications presented in the paper are available at:
 
 - `MOSAIC/Application_Immune_response` – clonal B cell competition in immunology
-- 
 - `MOSAIC/Application_delay` – transcriptional feedback with heterogeneous delays
-- 
 - `MOSAIC/Application_Temporal_network` – bursty human interactions in temporal networks
         
         
