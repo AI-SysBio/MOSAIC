@@ -92,7 +92,9 @@ Keep in mind that non-Markovian simulations are only available for reaction chan
 
 
 
-### Reproducing Results from the paper
+### Reproducing Results from the publication
+
+[1] Pélissier, A, Phan, M, et al. "Unifying non-Markovian Dynamics and Agent Heterogeneity in Scalable Stochastic Simulation". *Submitted to Proceedings of the National Academy of Sciences* (2022) [[Preprint]](https://arxiv.org/abs/2212.05059)
 
 Models for the three application presented in the paper can be found in `MOSAIC/Application_Immune_response`, `MOSAIC/Application_delay` and `MOSAIC/Application_Temporal_network`.
 
