@@ -97,9 +97,12 @@ Keep in mind that non-Markovian simulations are only available for reaction chan
 [1] Pélissier, A, Phan, M, et al. "Unifying non-Markovian Dynamics and Agent Heterogeneity in Scalable Stochastic Simulation". *Submitted to Proceedings of the National Academy of Sciences* (2022) [[Preprint]](https://arxiv.org/abs/2212.05059)
 
 The models corresponding to the three applications presented in the paper are available at:
-`MOSAIC/Application_Immune_response` – clonal B cell competition in immunology
-`MOSAIC/Application_delay` – transcriptional feedback with heterogeneous delays
-`MOSAIC/Application_Temporal_network` – bursty human interactions in temporal networks
+
+- `MOSAIC/Application_Immune_response` – clonal B cell competition in immunology
+- 
+- `MOSAIC/Application_delay` – transcriptional feedback with heterogeneous delays
+- 
+- `MOSAIC/Application_Temporal_network` – bursty human interactions in temporal networks
         
         
 
