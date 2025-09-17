@@ -6,19 +6,14 @@ Discrete stochastic processes are widespread in both nature and human-made syste
 &nbsp;
 
 
-
-        
-        
 ### Simulating a non-Markovian system
 
-First, you need to install REGIR, or you can use the `REGIR.py` file provided in the repository:
-
-	- pip install REGIR
 
 
-Then, you can run a non-Markovian simulation with the toy example below, or load an `SBML` model directly into REGIR (check out the [REGIR/SBML](REGIR/SBML) folder for detailed instructions). Other examples, including the three biochemical systems described in the paper: Cell division, differentiation and RNA transcription, are provided in the `/REGIR/Examples` and `/REGIR/Biochemical_applications` folders.
 
-	import REGIR as gil
+First, you need to load `MOSAIC/MOSAIC.py` file provided in the repository. Then, you can run a non-Markovian simulation with the toy example below
+
+	import MOSAIC as mosaic
 
 	#Set the simulation parameters:
 	class param:
@@ -34,13 +29,13 @@ Then, you can run a non-Markovian simulation with the toy example below, or load
 	alpha2 = 5
       
 	#Define the reaction chanels:
-	reaction1 = gil.Reaction_channel(param,rate=r1, shape_param=alpha1, distribution = 'Gamma')
+	reaction1 = mosaic.Reaction_channel(param,rate=r1, shape_param=alpha1, distribution = 'Gamma')
 	reaction1.reactants = ['A']
 	reaction1.products = ['B']	
-	reaction2 = gil.Reaction_channel(param,rate=r2, shape_param=alpha2, distribution = 'Weibull')
+	reaction2 = mosaic.Reaction_channel(param,rate=r2, shape_param=alpha2, distribution = 'Weibull')
 	reaction2.reactants = ['B']
 	reaction2.products = ['C','A']	
-	reaction3 = gil.Reaction_channel(param,rate=r3)
+	reaction3 = mosaic.Reaction_channel(param,rate=r3)
 	reaction3.reactants = ['A','B']
 	reaction3.products = []
 		
@@ -92,20 +87,14 @@ With the current implementation, each available distribution are characterised b
           - shape: γ (https://en.wikipedia.org/wiki/Cauchy_distribution)
       
 
-Keep in mind that non-Markovian simulations are only available for reaction channels with a single reactant, as the definition of inter-event time distribution is ambigious for channels with multiple reactants. If a channel is defined without or with more than one reactant, it will be considered as a Poisson process. Also, note that monotolically decreasing distributions, such as Weibull (k < 1), gamma (α < 1) or power laws, are not available in the current implementation of this repository, as these can be more elegantly and efficiently simulated with the Laplace Gillespie algorithm (LGA) [2]. 
-
-*Feel free to drop me an email if you have interest in me adding the Laplace Gillespie or any other relevant distributions to this implementation.* 
+Keep in mind that non-Markovian simulations are only available for reaction channels with a single reactant, as the definition of inter-event time distribution is ambigious for channels with multiple reactants. If a channel is defined without or with more than one reactant, it will be considered as a Poisson process. 
 
 
-### Customizing REGIR for your system
 
-The REGIR framework offer countless possibilities and highly customizable models. However, with the current implementation, reactions propensities are always proportional to the number of reactant. For example, the reaction (A+B -> C) will have a propensity of *a = A x B x r*. In some models, you might want to implement more complex formula for the reaction propensities, (such as for example *a = A x B x r / D*, where D is a parameter that evolves with the system). To do so, you can  directly modify the `REGIR/compute_propensities` function according to your need. Likewise, you might want to set up specific rejection rules if your reactants have some individual properties, and modify them appropriatly. To do so, first define your reactant properties in the `REGIR/Reactant` class, and then define your reaction specific rules in `REGIR/ perform_reaction`.
+### Reproducing Results from the paper
 
-*Feel free to email me if you are not sure how to do it, I will be happy to help !*
+Models for the three application presented in the paper can be found in `MOSAIC/Application_Immune_response`, `MOSAIC/Application_delay` and `MOSAIC/Application_Temporal_network`.
 
+        
+        
 
-## References
-
-[1] Pélissier, A, Phan, M, et al. "Practical and scalable simulations of non-Markovian stochastic processes". *Submitted to Proceedings of the National Academy of Sciences* (2022) [[Preprint]](https://arxiv.org/abs/2212.05059)
-
-[2] Masuda, Naoki, and Luis EC Rocha. "A Gillespie algorithm for non-Markovian stochastic processes." *Siam Review 60.1* (2018): 95-115.
