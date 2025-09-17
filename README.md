@@ -1,6 +1,7 @@
 # MOSAIC: Scalable Stochastic Simulation with Heterogeneous and Non-Markovian Agents
 
-<img align="right" src="https://raw.githubusercontent.com/Aurelien-Pelissier/MOSAIC/master/Figures/MOSAIC.png" width=400>
+<img align="right" src="https://raw.githubusercontent.com/Aurelien-Pelissier/MOSAIC/blob/main/Figures/MOSAIC.png" width=400>
+
 Discrete stochastic processes are widespread in both nature and human-made systems, with applications across physics, biochemistry, epidemiology, social patterns and finance, just to name a few. In the majority of these systems, the dynamics cannot be properly described with memoryless (or Markovian) interactions, and thus require the use of numerical tools for analyzing these non-Markovian dynamics. This repository contains the implementattion of a general and scalable framework to simulate non-Markovian stochastic systems with arbitrary inter-event time distribution and accuracy. The algorithm is referred to as the Rejection Gillespie algorithm for non-Markovian Reactions (REGIR) [1].
 
 &nbsp;
