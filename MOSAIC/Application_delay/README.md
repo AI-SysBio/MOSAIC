@@ -10,10 +10,7 @@ The panels above show (B) the accuracy of MOSAIC as a function of system size,
 (C, D) oscillations with energy-limited and unconstrained elongation and (E, F) the
 runtime scaling of MOSAIC against DelaySSA and the standard Gillespie algorithm (SG).
 The nMGA curve of panel E is not produced by these scripts (no nMGA implementation is
-included). The accuracy panel is computed for the β values listed in
-`Model_benchmark_accuracy.py` (0.01 to 100); its precomputed data in `Saved_pop/` were
-regenerated after the population-recording fix described in the main README, so the
-values differ from the published panel B.
+included).
 
 | Script | Produces | Precomputed data | Flag to recompute |
 |---|---|---|---|
