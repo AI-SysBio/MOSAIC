@@ -9,7 +9,7 @@ from math import log, gamma
 from scipy.stats import expon, weibull_min
 import os,sys
 
-import lib_REGIR_with_delay as gil
+import lib_MOSAIC_with_delay as gil
 from datetime import datetime
 
 
@@ -86,7 +86,7 @@ def main():
         
         if method == 'DelaySSA':
             channel = gil.Reaction_channel(param, rate=kon, shape_param = 3, distribution = 'Gamma', precompute_delay = True,  name='mRNA elongation: n -> M')
-        elif method == 'REGIR':
+        elif method == 'MOSAIC':
             channel = gil.Reaction_channel(param, rate=kon, shape_param = 3, distribution = 'Gamma', precompute_delay = False,  name='mRNA elongation: n -> M')
         else:
             channel = gil.Reaction_channel(param, rate=kon, distribution = 'Exponential',  name='mRNA elongation: n -> M')
@@ -157,12 +157,12 @@ def main():
     
     
     
-    time_REGIR = []
-    time_REGIR10 = []
+    time_MOSAIC = []
+    time_MOSAIC10 = []
     time_Delay = []
     time_Exp = []
-    nreac_REGIR = []
-    nreac_REGIR10 = []
+    nreac_MOSAIC = []
+    nreac_MOSAIC10 = []
     nreac_Delay = []
     nreac_Exp = []
     #B_list = np.logspace(0,14,num = 15, base=2).astype(int)
@@ -181,54 +181,54 @@ def main():
             else:
                 Nsim = 1
             
-            print('  REGIR...')
-            Rtime, nR = run_simulation(Nsim = Nsim, beta = Beta, method = 'REGIR', f = 1)
+            print('  MOSAIC...')
+            Rtime, nR = run_simulation(Nsim = Nsim, beta = Beta, method = 'MOSAIC', f = 1)
             print('  DelaySSA...')
             Dtime, nD = run_simulation(Nsim = Nsim, beta = Beta, method = 'DelaySSA')
             print('  Exp...')
             Etime, nE = run_simulation(Nsim = Nsim, beta = Beta, method = 'EXP')
             
-            print('  REGIR10...')
-            Rtime, nR = run_simulation(Nsim = Nsim, beta = Beta, method = 'REGIR', f=10)
+            print('  MOSAIC10...')
+            Rtime, nR = run_simulation(Nsim = Nsim, beta = Beta, method = 'MOSAIC', f=10)
             
-            time_REGIR.append(Rtime/Nsim)
+            time_MOSAIC.append(Rtime/Nsim)
             time_Delay.append(Dtime/Nsim)
             time_Exp.append(Etime/Nsim)
-            nreac_REGIR.append(nR/Nsim)
+            nreac_MOSAIC.append(nR/Nsim)
             nreac_Delay.append(nD/Nsim)
             nreac_Exp.append(nE/Nsim)
-            time_REGIR10.append(Rtime/Nsim)
-            nreac_REGIR10.append(nR/Nsim)
+            time_MOSAIC10.append(Rtime/Nsim)
+            nreac_MOSAIC10.append(nR/Nsim)
         
-        np.save('Simulation_results/time_REGIR.npy', time_REGIR)
+        np.save('Simulation_results/time_MOSAIC.npy', time_MOSAIC)
         np.save('Simulation_results/time_Delay.npy', time_Delay)
         np.save('Simulation_results/time_EXP.npy', time_Exp)
-        np.save('Simulation_results/Nreac_REGIR.npy', nreac_REGIR)
+        np.save('Simulation_results/Nreac_MOSAIC.npy', nreac_MOSAIC)
         np.save('Simulation_results/Nreac_Delay.npy', nreac_Delay)
         np.save('Simulation_results/Nreac_EXP.npy', nreac_Exp)
         
-        np.save('Simulation_results/time_REGIR10.npy', time_REGIR10)
-        np.save('Simulation_results/Nreac_REGIR10.npy', nreac_REGIR10)
+        np.save('Simulation_results/time_MOSAIC10.npy', time_MOSAIC10)
+        np.save('Simulation_results/Nreac_MOSAIC10.npy', nreac_MOSAIC10)
 
         
-    time_REGIR = np.load('Simulation_results/time_REGIR.npy')
-    time_REGIR10 = np.load('Simulation_results/time_REGIR10.npy')
+    time_MOSAIC = np.load('Simulation_results/time_MOSAIC.npy')
+    time_MOSAIC10 = np.load('Simulation_results/time_MOSAIC10.npy')
     time_Delay = np.load('Simulation_results/time_Delay.npy')
     time_Exp = np.load('Simulation_results/time_EXP.npy')
-    nreac_REGIR = np.load('Simulation_results/Nreac_REGIR.npy')
-    nreac_REGIR10 = np.load('Simulation_results/Nreac_REGIR10.npy')
+    nreac_MOSAIC = np.load('Simulation_results/Nreac_MOSAIC.npy')
+    nreac_MOSAIC10 = np.load('Simulation_results/Nreac_MOSAIC10.npy')
     nreac_Delay = np.load('Simulation_results/Nreac_Delay.npy')
     nreac_Exp = np.load('Simulation_results/Nreac_EXP.npy')
     
     
 
-    time_nMGA = time_REGIR**2.02 * 115
+    time_nMGA = time_MOSAIC**2.02 * 115
     time_nMGA[time_nMGA>2e3] = np.nan
         
     #B_list_ = B_list
     #B_list = B_list[7:]
     fitted_Exp = fit_log_line(B_list,time_Exp)
-    fitted_REGIR = fit_log_line(B_list,time_REGIR)
+    fitted_MOSAIC = fit_log_line(B_list,time_MOSAIC)
     fitted_Delay = fit_log_line(B_list,time_Delay)
     fitted_nMGA = fit_log_line(B_list[:-2],time_nMGA[:-2])
     
@@ -240,15 +240,15 @@ def main():
     plt.scatter(B_list, time_Delay, s=35, color = 'blue', label = r'DelaySSA (gamma, $\alpha=3$)', edgecolor = 'black')
     #plt.scatter(B_list, time_Exp, s=60, color = 'blue', label = 'SG (exponential)')
     #plt.plot(B_list, fitted_Exp, lw=2, color = 'blue', ls = '--')
-    plt.scatter(B_list, time_REGIR, s=35, color = 'red', label = r'REGIR (gamma, $\alpha=3$, $\lambda_{max} \geq \lambda_0$)', edgecolor = 'black')
-    plt.plot(B_list, fitted_REGIR, lw=2, color = 'red', ls = '--')
-    plt.scatter(B_list, time_REGIR10, s=35, color = 'orange', label = r'REGIR (gamma, $\alpha=3$, $N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
+    plt.scatter(B_list, time_MOSAIC, s=35, color = 'red', label = r'MOSAIC (gamma, $\alpha=3$, $\lambda_{max} \geq \lambda_0$)', edgecolor = 'black')
+    plt.plot(B_list, fitted_MOSAIC, lw=2, color = 'red', ls = '--')
+    plt.scatter(B_list, time_MOSAIC10, s=35, color = 'orange', label = r'MOSAIC (gamma, $\alpha=3$, $N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
     #plt.plot(B_list, fitted_Delay, lw=2, color = 'red', ls = '--')
     #plt.plot(N_list, N_list*np.log(N_list)/1e5, lw=2, color = 'red' )
     plt.fill_between(B_list, time_Delay*0.85, time_Delay*1.15, alpha = 0.2, color = 'blue')
-    plt.fill_between(B_list, time_REGIR*0.85, time_REGIR*1.15, alpha = 0.2, color = 'red')
+    plt.fill_between(B_list, time_MOSAIC*0.85, time_MOSAIC*1.15, alpha = 0.2, color = 'red')
     plt.fill_between(B_list[7:], time_nMGA[7:]*0.85, time_nMGA[7:]*1.15, alpha = 0.2, color = 'green')
-    plt.fill_between(B_list[:7], time_REGIR10[:7]*0.85, time_REGIR10[:7]*1.15, alpha = 0.2, color = 'orange')
+    plt.fill_between(B_list[:7], time_MOSAIC10[:7]*0.85, time_MOSAIC10[:7]*1.15, alpha = 0.2, color = 'orange')
     
     plt.xscale('log')
     plt.yscale('log')
@@ -261,27 +261,27 @@ def main():
     plt.show()
     
     
-    time_REGIR = time_REGIR / nreac_REGIR
-    time_REGIR10 =  time_REGIR10 / nreac_REGIR10
+    time_MOSAIC = time_MOSAIC / nreac_MOSAIC
+    time_MOSAIC10 =  time_MOSAIC10 / nreac_MOSAIC10
     time_Delay = time_Delay / nreac_Delay
     time_Exp = time_Exp / nreac_Exp
     fitted_Exp = fit_log_line(B_list,time_Exp)
-    fitted_REGIR = fit_log_line(B_list,time_REGIR)
+    fitted_MOSAIC = fit_log_line(B_list,time_MOSAIC)
     
     
     plt.figure(figsize = (7,4))
     plt.scatter(B_list, time_Exp, s=60, color = 'black', label = 'SG (exponential)', edgecolor = 'black')
     plt.plot(B_list, fitted_Exp, lw=2, color = 'black', ls = '--')
     plt.scatter(B_list, time_Delay, s=60, color = 'blue', label = r'DelaySSA (gamma, $\alpha=3$)', edgecolor = 'black')
-    plt.scatter(B_list, time_REGIR, s=60, color = 'red', label = r'REGIR (gamma, $\alpha=3$, $\lambda_{max} \geq \lambda_0$)', edgecolor = 'black')
-    plt.plot(B_list, fitted_REGIR, lw=2, color = 'red', ls = '--')
-    plt.scatter(B_list, time_REGIR10, s=60, color = 'orange', label = r'REGIR (gamma, $\alpha=3$, $N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
+    plt.scatter(B_list, time_MOSAIC, s=60, color = 'red', label = r'MOSAIC (gamma, $\alpha=3$, $\lambda_{max} \geq \lambda_0$)', edgecolor = 'black')
+    plt.plot(B_list, fitted_MOSAIC, lw=2, color = 'red', ls = '--')
+    plt.scatter(B_list, time_MOSAIC10, s=60, color = 'orange', label = r'MOSAIC (gamma, $\alpha=3$, $N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
     #plt.plot(B_list, fitted_Delay, lw=2, color = 'red')
     #plt.plot(B_list, N_list*np.log(N_list)/1e5, lw=2, color = 'red' )
     plt.fill_between(B_list, time_Exp*0.9, time_Exp*1.1, alpha = 0.1, color = 'black')
     plt.fill_between(B_list, time_Delay*0.9, time_Delay*1.1, alpha = 0.1, color = 'blue')
-    plt.fill_between(B_list, time_REGIR*0.9, time_REGIR*1.1, alpha = 0.1, color = 'red')
-    plt.fill_between(B_list[:7], time_REGIR10[:7]*0.85, time_REGIR10[:7]*1.15, alpha = 0.1, color = 'orange')
+    plt.fill_between(B_list, time_MOSAIC*0.9, time_MOSAIC*1.1, alpha = 0.1, color = 'red')
+    plt.fill_between(B_list[:7], time_MOSAIC10[:7]*0.85, time_MOSAIC10[:7]*1.15, alpha = 0.1, color = 'orange')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel(r'$\beta$ parameter')

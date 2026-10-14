@@ -50,41 +50,41 @@ def main():
     
     #time_Next = []
     time_DSSA = []
-    time_regir = []
+    time_mosaic = []
     time_gil = []
     for N in N_list:
         print('Benchmaarking N_init = %s' % N)
         tgil, Nreactions_gil = simulate_gil(N, reaction_list)
-        tregir, Nreactions_reg = simulate_REGIR(N, reaction_list)
+        tmosaic, Nreactions_reg = simulate_MOSAIC(N, reaction_list)
         #tnext, Nreactions_next = simulate_Next_reaction(N, reaction_list)
         tdssa, Nreactions_dssa = simulate_DSSA(N, reaction_list)
         
         #time_Next.append(tnext/Nreactions_next)
         time_DSSA.append(tdssa/Nreactions_dssa)
-        time_regir.append(tregir/Nreactions_reg)
+        time_mosaic.append(tmosaic/Nreactions_reg)
         time_gil.append(tgil/Nreactions_gil)
         
         
         
     #time_Next = np.array(time_Next)
     time_DSSA = np.array(time_DSSA)
-    time_regir = np.array(time_regir)
+    time_mosaic = np.array(time_mosaic)
     time_gil = np.array(time_gil)
 
     
     plt.figure(figsize = (8,4))
     #plt.scatter(N_list, time_Next/10, s=60, color = 'green', label = r'Next reaction (gamma, $\alpha=6$)')
     plt.scatter(N_list, time_DSSA/10, s=60, color = 'red', label = r'DSSA (gamma, $\alpha=6$)')
-    plt.scatter(N_list, time_regir/10, s=60, color = 'blue', label = r'REGIR (gamma, $\alpha=6$)')
+    plt.scatter(N_list, time_mosaic/10, s=60, color = 'blue', label = r'MOSAIC (gamma, $\alpha=6$)')
     plt.scatter(N_list, time_gil/10, s=60, color = 'black', label = r'SG (Poisson)')
     
     
     #fitted_Next = fit_log_line(N_list,time_Next)
     fitted_DSSA = fit_log_line(N_list,time_DSSA)
-    fitted_regir = fit_log_line(N_list,time_regir)
+    fitted_mosaic = fit_log_line(N_list,time_mosaic)
     fitted_gil = fit_log_line(N_list,time_gil)
     
-    plt.plot(N_list, fitted_regir/10, lw=2, color = 'blue')
+    plt.plot(N_list, fitted_mosaic/10, lw=2, color = 'blue')
     #plt.plot(N_list, fitted_Next/10, lw=2, color = 'green')
     plt.plot(N_list, fitted_DSSA/10, lw=2, color = 'red')
     plt.plot(N_list, fitted_gil/10, lw=2, color = 'black')
@@ -419,7 +419,7 @@ def simulate_Next_reaction(N_init, reaction_list):
     
     return total_time, Nreactions
     
-def simulate_REGIR(NA, reaction_list):    
+def simulate_MOSAIC(NA, reaction_list):    
     
     
     class param:
@@ -574,7 +574,7 @@ def simulate_gil(N_init, reaction_list):
     
     #If I have like 1 million reactants, I dont need to keep track of any time to next event,
     #With delay I need to COMPUTE the next witing time after each reaction occured (But its very fast though)
-    # With REGIR its not needed thanks to the rejection.
+    # With MOSAIC its not needed thanks to the rejection.
     
     #Delay recation method can be implemented very easiy, I need to understand its limits
     #they key is that delayed reaction are always stored, is it always exact?
@@ -588,7 +588,7 @@ def simulate_gil(N_init, reaction_list):
     # B -> C
     
     # Whats surprising to me is that here we are simply precomputing all delay and there is no point to do Any Gillespie anymore, 
-    # A -> 2A + B (Gamma distribution, easy with Regir)
+    # A -> 2A + B (Gamma distribution, easy with Mosaic)
     # A -> 2A + B (With delay? We can just assume No gillespie, we initialize the random delay for all A as soon as they exist)
     
     #System 1: Simple Epidemic model SIER

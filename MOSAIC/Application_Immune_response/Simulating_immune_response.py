@@ -14,7 +14,7 @@ from math import gamma
 import pickle
 import seaborn as sns
 
-import lib_REGIR_with_rate_function as gil
+import lib_MOSAIC_with_rate_function as gil
 
 plt.rcParams.update({'font.size': 19})
 

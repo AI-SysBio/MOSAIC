@@ -8,7 +8,7 @@ from math import log, gamma
 from scipy.stats import expon, weibull_min
 import os,sys
 
-import lib_REGIR_with_delay as gil
+import lib_MOSAIC_with_delay as gil
 from datetime import datetime
 from math import sqrt
 
@@ -95,7 +95,7 @@ def main():
         
         if method == 'DelaySSA':
             channel = gil.Reaction_channel(param, rate=kon, shape_param = 3, distribution = 'Gamma', precompute_delay = True,  name='mRNA elongation: n -> M')
-        elif method == 'REGIR':
+        elif method == 'MOSAIC':
             channel = gil.Reaction_channel(param, rate=kon, shape_param = 3, distribution = 'Gamma', precompute_delay = False,  name='mRNA elongation: n -> M')
         else:
             channel = gil.Reaction_channel(param, rate=kon, distribution = 'Exponential',  name='mRNA elongation: n -> M')
@@ -204,18 +204,18 @@ def main():
             pop_delaySSA1 = run_simulation(Nsim = Nsim, beta = Beta, method = 'DelaySSA', plot_pop = False, f=1)
             print('    DelaySSA2...')
             pop_delaySSA2 = run_simulation(Nsim = Nsim, beta = Beta, method = 'DelaySSA', plot_pop = False, f=1)
-            print('    REGIR...')
-            pop_REGIR = run_simulation(Nsim = Nsim, beta = Beta, method = 'REGIR', plot_pop = False, f=1)
+            print('    MOSAIC...')
+            pop_MOSAIC = run_simulation(Nsim = Nsim, beta = Beta, method = 'MOSAIC', plot_pop = False, f=1)
             
             
             
             Mpop_d1_ = pop_delaySSA1[:,:,1].mean(axis=0)
             Mpop_d2_ = pop_delaySSA2[:,:,1].mean(axis=0)
-            Mpop_r_ = pop_REGIR[:,:,1].mean(axis=0)
+            Mpop_r_ = pop_MOSAIC[:,:,1].mean(axis=0)
             
             np.save('Saved_pop/delay1_%s_%s.npy' % (Beta,Nsim), Mpop_d1_)
             np.save('Saved_pop/delay2_%s_%s.npy' % (Beta,Nsim), Mpop_d2_)
-            np.save('Saved_pop/regir_%s_%s.npy' % (Beta,Nsim), Mpop_r_)
+            np.save('Saved_pop/mosaic_%s_%s.npy' % (Beta,Nsim), Mpop_r_)
             
             #may have to save discretized means when running the simulation instead of all populations
             #(it was cauzing problems cauze the population array is too large)
@@ -223,15 +223,15 @@ def main():
         else:
             Mpop_d1_ = np.load('Saved_pop/delay1_%s_%s.npy' % (Beta,Nsim))
             Mpop_d2_ = np.load('Saved_pop/delay2_%s_%s.npy' % (Beta,Nsim))
-            Mpop_r_ = np.load('Saved_pop/regir_%s_%s.npy' % (Beta,Nsim))
+            Mpop_r_ = np.load('Saved_pop/mosaic_%s_%s.npy' % (Beta,Nsim))
             
             if False:
-                print('    REGIR (f=10)...')
-                pop_REGIR = run_simulation(Nsim = Nsim, beta = Beta, method = 'REGIR', plot_pop = False, f=10)
-                Mpop_r10_ = pop_REGIR[:,:,1].mean(axis=0)
-                np.save('Saved_pop/regir10_%s_%s.npy' % (Beta,Nsim), Mpop_r10_)
+                print('    MOSAIC (f=10)...')
+                pop_MOSAIC = run_simulation(Nsim = Nsim, beta = Beta, method = 'MOSAIC', plot_pop = False, f=10)
+                Mpop_r10_ = pop_MOSAIC[:,:,1].mean(axis=0)
+                np.save('Saved_pop/mosaic10_%s_%s.npy' % (Beta,Nsim), Mpop_r10_)
             else:
-                Mpop_r10_ = np.load('Saved_pop/regir10_%s_%s.npy' % (Beta,Nsim))
+                Mpop_r10_ = np.load('Saved_pop/mosaic10_%s_%s.npy' % (Beta,Nsim))
             
             
         print('Saved_pop/delay1_%s_%s.npy' % (Beta,Nsim))
@@ -246,14 +246,14 @@ def main():
         
         #plt.plot(time_points, Mpop_d1, label = 'DelaySSA1')
         #plt.plot(time_points, Mpop_d2, label = 'DelaySSA2')
-        #plt.plot(time_points, Mpop_r, label = 'REGIR')
+        #plt.plot(time_points, Mpop_r, label = 'MOSAIC')
         #plt.legend(fontsize = 12)
         #plt.show()
         
         plt.plot(time_points, Mpop_d1_, label = 'DelaySSA1')
         plt.plot(time_points, Mpop_d2_, label = 'DelaySSA2')
-        plt.plot(time_points, Mpop_r_, label = r'REGIR ($\lambda_{max} = \lambda_0$)')
-        plt.plot(time_points, Mpop_r10_, label = r'REGIR ($\lambda_{max} = 10\lambda_0$)')
+        plt.plot(time_points, Mpop_r_, label = r'MOSAIC ($\lambda_{max} = \lambda_0$)')
+        plt.plot(time_points, Mpop_r10_, label = r'MOSAIC ($\lambda_{max} = 10\lambda_0$)')
         plt.legend(fontsize = 12)
         plt.show()
         
@@ -325,9 +325,9 @@ def main():
     
     plt.fill_between([1e-3,1e6], [0,0], [0.0075,0.0075], color = 'black', alpha = 0.05)
     plt.plot(B_list, RMSD_baseline_array, color = 'black', lw=1.5, ls = '--')
-    plt.scatter(B_list, RMSD11_array, color = 'orange', s=60, label = r'REGIR ($N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
+    plt.scatter(B_list, RMSD11_array, color = 'orange', s=60, label = r'MOSAIC ($N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
     plt.scatter(B_list, RMSD12_array, color = 'orange', s=60, edgecolor = 'black')
-    plt.scatter(B_list, RMSD1_array, color = 'red', s=60, label = r'REGIR ($\lambda_{max} \geq \lambda_0$)', edgecolor = 'black')
+    plt.scatter(B_list, RMSD1_array, color = 'red', s=60, label = r'MOSAIC ($\lambda_{max} \geq \lambda_0$)', edgecolor = 'black')
     plt.scatter(B_list, RMSD2_array, color = 'red', s=60, edgecolor = 'black')
     plt.scatter(B_list, RMSD_baseline_array, color = 'black', s = 30, label = 'Baseline')
     plt.xlabel(r'$\beta$ parameter')

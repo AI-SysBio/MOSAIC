@@ -52,7 +52,8 @@ All the saved observables are:
 """
 
 G_metric_names = ['modularity', 'mean_diversity', 'degree_assortativity', 'clust_coefficient', 'transitivity', 'density']
-model_name_plot = {'Conf':'Conference', 'Sim_ADM_V9':'AD modeling', "Sim_spanning_tree": 'Spanning Tree', 'Sim_REGIR_Basic':'REGIR-TN A', 'Sim_REGIR_first_order':'REGIR-TN B'}
+# keys are file-name prefixes of the networks shipped in Data.zip (Sim_MOSAIC_* = MOSAIC-TN)
+model_name_plot = {'Conf':'Conference', 'Sim_ADM_V9':'AD modeling', "Sim_spanning_tree": 'Spanning Tree', 'Sim_REGIR_Basic':'MOSAIC-TN A', 'Sim_REGIR_first_order':'MOSAIC-TN B'}
 
 def main():
     
@@ -267,7 +268,7 @@ def main():
     
     #Adding additional metrics computed from another study, introduce some std
     manual_add = ['ETN_autosim']
-    manual_dev_ETN_autosim = [0.73, 0.825, 3.26, 1.87] #REGIR-A, REGIR-B, Spanning, ADM
+    manual_dev_ETN_autosim = [0.73, 0.825, 3.26, 1.87] #MOSAIC-A, MOSAIC-B, Spanning, ADM
     std_factor = [10,10,3,7]
     to_add = [manual_dev_ETN_autosim]
     

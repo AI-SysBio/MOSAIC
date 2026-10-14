@@ -11,7 +11,7 @@ attributes that are updated by custom reaction functions.
 | Script | Produces | Precomputed data | Flag to recompute |
 |---|---|---|---|
 | `Simulating_immune_response.py` | clone dominance over time (panel B) and dominance score against the AID-Confetti experiments of Tas et al. (2016) (panel C) | `GC_diversity.xlsx` (experimental data, Tas et al., *Science* 2016) | runs live (`Nsim` realisations) |
-| `Benchmarking_Immune.py` | runtime vs. number of B cells for MOSAIC, SG and DelaySSA (panel D) | `time_REGIR.npy`, `time_Gil.npy`, `time_DSSA.npy` | `recompute = True` |
+| `Benchmarking_Immune.py` | runtime vs. number of B cells for MOSAIC, SG and DelaySSA (panel D) | `time_MOSAIC.npy`, `time_Gil.npy`, `time_DSSA.npy` | `recompute = True` |
 
 Run from this folder:
 
@@ -19,7 +19,7 @@ Run from this folder:
 python Simulating_immune_response.py
 ```
 
-The scripts use `lib_REGIR_with_rate_function.py`, a snapshot of the core library that
+The scripts use `lib_MOSAIC_with_rate_function.py`, a snapshot of the core library that
 adds:
 
 - `perform_reaction_custom`: a user function called instead of the default

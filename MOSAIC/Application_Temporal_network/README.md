@@ -38,11 +38,11 @@ package for the community diversity metric.
 
 | File | Model |
 |---|---|
-| `lib_REGIR_IP_model.py` | MOSAIC-TN. `case='Basic'` is MOSAIC-TN A, `case='first_order'` is MOSAIC-TN B (memory of first-order acquaintances), `case='second_order'` adds friends of friends, `use_IP=True` adds individual activity levels. |
+| `lib_MOSAIC_IP_model.py` | MOSAIC-TN. `case='Basic'` is MOSAIC-TN A, `case='first_order'` is MOSAIC-TN B (memory of first-order acquaintances), `case='second_order'` adds friends of friends, `use_IP=True` adds individual activity levels. |
 | `lib_Spanning_tree.py` | spanning-tree baseline (requires `numba`). |
 | `lib_ADM.py` | activity-driven model baseline. The simulations were generated with [Didier Le Bail's code](https://github.com/DidierLeBail/Temporal-networks-PhD-code); only the precomputed results are included here. |
 
-The network files `Sim_REGIR_Basic_*`, `Sim_REGIR_first_order_*` and `Sim_ADM_V9_*`
+The network files `Sim_MOSAIC_Basic_*`, `Sim_MOSAIC_first_order_*` and `Sim_ADM_V9_*`
 in `Data/Networks` are ten realisations of each model used for the comparison.
 
 Data source: SocioPatterns, http://www.sociopatterns.org/ (ICCSS17 dataset, Génois

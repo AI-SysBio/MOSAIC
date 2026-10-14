@@ -35,7 +35,7 @@ the results of the paper:
 &nbsp;
 ## Scope of this repository
 
-A general, pip-installable implementation of the non-Markovian Gillespie method
+A general, pip-installable implementation of non-Markovian Gillespie methods
 (rejection scheme, Laplace Gillespie and DelaySSA, eight waiting-time distributions) is
 maintained separately as [NoMaSS](https://github.com/AI-SysBio/NoMaSS)
 (`pip install nomass`). Use it to simulate your own reaction networks.
@@ -80,7 +80,7 @@ redrawn in seconds.
   <img src="Figures/Social_interactions.png" width="35%">
 </p>
 
-The two application libraries (`lib_REGIR_with_delay.py`, `lib_REGIR_with_rate_function.py`)
+The two application libraries (`lib_MOSAIC_with_delay.py`, `lib_MOSAIC_with_rate_function.py`)
 are snapshots of the core library extended with the hooks each application needed
 (Anderson scheme and Hes1 rate functions; custom reactions and Pareto waiting times).
 They are kept as used for the paper so that the results can be reproduced exactly.

@@ -16,7 +16,7 @@ from scipy.stats import linregress
 
 
 save_results = True
-#Normal Regir is 5min per simulation
+#Normal Mosaic is 5min per simulation
 
 #parameters for now
 #N = 274
@@ -31,7 +31,7 @@ def getID(i,j):
     return ID
 
 
-def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
+def run_MOSAIC_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
     
     
     #Tend = 7249
@@ -247,13 +247,13 @@ def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
     x,y,bins = get_log_pdf(Real_data['Interacting_time'])
     plt.scatter(x, y, label="Interaction (conf)", alpha=1, color = 'green')
     x,y,_ = get_log_pdf(interaction_times, forced_bins = bins)
-    plt.scatter(x, y, label="Interaction (REGIR)", alpha=1, color = 'darkgreen', marker = 'x')
+    plt.scatter(x, y, label="Interaction (MOSAIC)", alpha=1, color = 'darkgreen', marker = 'x')
     
     
     x,y,bins = get_log_pdf(Real_data['Non_interacting_time'])
     plt.scatter(x, y, label="Inter-event time (conf)", alpha=1, color = 'red')
     x,y,_ = get_log_pdf(inter_event_times, forced_bins = bins)
-    plt.scatter(x, y, label="Inter-event time (REGIR)", alpha=1, color = 'darkred', marker = 'x')
+    plt.scatter(x, y, label="Inter-event time (MOSAIC)", alpha=1, color = 'darkred', marker = 'x')
     
     
     plt.xlabel("Time")
@@ -327,9 +327,9 @@ def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
     if save_results:
         print('Writting network interaction file')
         if use_IP:
-            write_interaction_file(All_interactions, 'REGIR_networks/Sim_conf_%s_IP.csv' % case)
+            write_interaction_file(All_interactions, 'MOSAIC_networks/Sim_conf_%s_IP.csv' % case)
         else:
-            write_interaction_file(All_interactions, 'REGIR_networks/Sim_conf_%s.csv' % case)
+            write_interaction_file(All_interactions, 'MOSAIC_networks/Sim_conf_%s.csv' % case)
         
         all_results = dict()
         all_results['Interacting_time'] = np.array(interaction_times)
@@ -340,9 +340,9 @@ def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
         all_results['Friends'] = prop_of_friends*N
         all_results['Proportion'] = next_interaction_ratio
         if use_IP:
-            save_dict(all_results, 'REGIR_networks/Sim_conf_%s_IP.pkl' % case)
+            save_dict(all_results, 'MOSAIC_networks/Sim_conf_%s_IP.pkl' % case)
         else:
-            save_dict(all_results, 'REGIR_networks/Sim_conf_%s.pkl' % case)
+            save_dict(all_results, 'MOSAIC_networks/Sim_conf_%s.pkl' % case)
     
     sys.exit()
     
@@ -834,4 +834,4 @@ def quick_test(distribution = 'Pareto'):
 
     
 if __name__ == '__main__':
-    run_REGIR_simulation(15)
+    run_MOSAIC_simulation(15)

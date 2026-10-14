@@ -11,7 +11,7 @@ from datetime import datetime
 
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-import MOSAIC as gil_REGIR
+import MOSAIC as gil_MOSAIC
 
 
 """ --------------------------------------------------------------------------------------------
@@ -38,14 +38,14 @@ def main():
         compute_time_complexity(N_list, N_simul)
         
     time_Exp = np.load('Simulation_results/time_EXP.npy')
-    time_REGIR = np.load('Simulation_results/time_REGIR.npy')
+    time_MOSAIC = np.load('Simulation_results/time_MOSAIC.npy')
     time_Delay = np.load('Simulation_results/time_Delay.npy')
     nreac_Exp = np.load('Simulation_results/Nreac_EXP.npy')
-    nreac_REGIR = np.load('Simulation_results/Nreac_REGIR.npy')
+    nreac_MOSAIC = np.load('Simulation_results/Nreac_MOSAIC.npy')
     nreac_Delay = np.load('Simulation_results/Nreac_Delay.npy')
     
     fitted_Exp = fit_log_line(N_list,time_Exp/N_simul)
-    fitted_REGIR = fit_log_line(N_list,time_REGIR/N_simul)
+    fitted_MOSAIC = fit_log_line(N_list,time_MOSAIC/N_simul)
     fitted_Delay = fit_log_line(N_list,time_Delay/N_simul)
     
     
@@ -53,8 +53,8 @@ def main():
     plt.figure(figsize = (8,4))
     plt.scatter(N_list, time_Exp/N_simul, s=60, color = 'blue', label = 'SG (exponential)')
     plt.plot(N_list, fitted_Exp, lw=2, color = 'blue')
-    plt.scatter(N_list, time_REGIR/N_simul, s=60, color = 'green', label = r'REGIR (gamma, $\alpha=6$)')
-    plt.plot(N_list, fitted_REGIR, lw=2, color = 'green')
+    plt.scatter(N_list, time_MOSAIC/N_simul, s=60, color = 'green', label = r'MOSAIC (gamma, $\alpha=6$)')
+    plt.plot(N_list, fitted_MOSAIC, lw=2, color = 'green')
     plt.scatter(N_list, time_Delay/N_simul, s=60, color = 'red', label = r'Delay (gamma, $\alpha=6$)')
     plt.plot(N_list, fitted_Delay, lw=2, color = 'red')
     #plt.plot(N_list, N_list*np.log(N_list)/1e5, lw=2, color = 'red' )
@@ -69,18 +69,18 @@ def main():
     
     
     time_Exp = time_Exp / nreac_Exp
-    time_REGIR = time_REGIR / nreac_REGIR
+    time_MOSAIC = time_MOSAIC / nreac_MOSAIC
     time_Delay = time_Delay / nreac_Delay
     
     fitted_Exp = fit_log_line(N_list,time_Exp)
-    fitted_REGIR = fit_log_line(N_list,time_REGIR)
+    fitted_MOSAIC = fit_log_line(N_list,time_MOSAIC)
     fitted_Delay = fit_log_line(N_list,time_Delay)
     
     plt.figure(figsize = (8,4))
     plt.scatter(N_list, time_Exp, s=60, color = 'blue', label = 'SG (exponential)')
     #plt.plot(N_list, fitted_Exp, lw=2, color = 'blue')
-    plt.scatter(N_list, time_REGIR, s=60, color = 'green', label = r'REGIR (gamma, $\alpha=6$)')
-    #plt.plot(N_list, fitted_REGIR, lw=2, color = 'green')
+    plt.scatter(N_list, time_MOSAIC, s=60, color = 'green', label = r'MOSAIC (gamma, $\alpha=6$)')
+    #plt.plot(N_list, fitted_MOSAIC, lw=2, color = 'green')
     plt.scatter(N_list, time_Delay, s=60, color = 'red', label = r'Delay (gamma, $\alpha=6$)')
     #plt.plot(N_list, fitted_Delay, lw=2, color = 'red')
     #plt.plot(N_list, N_list*np.log(N_list)/1e5, lw=2, color = 'red' )
@@ -100,11 +100,11 @@ def compute_time_complexity(N_list, N_simul):
     
     r0 = 1 #same rate for every reactions
     
-    time_REGIR = []
+    time_MOSAIC = []
     time_Exp = []
     time_Delay = []
     nreac_Delay = []
-    nreac_REGIR = []
+    nreac_MOSAIC = []
     nreac_Exp = []
     
     for ni,N in enumerate(N_list):
@@ -120,14 +120,14 @@ def compute_time_complexity(N_list, N_simul):
         """ Gillespie Exp algorithm benchmarking"""
         #initialise reaction channels
         reaction_channel_list = []
-        channel = gil_REGIR.Reaction_channel(param,rate=r0, distribution = 'Exponential')
+        channel = gil_MOSAIC.Reaction_channel(param,rate=r0, distribution = 'Exponential')
         channel.reactants = ['A']
         channel.products = ['A']
         reaction_channel_list.append(channel)
 
 
         #initialise the Gillespie simulation
-        G_simul = gil_REGIR.Gillespie_simulation(N_init,param, print_warnings = True)
+        G_simul = gil_MOSAIC.Gillespie_simulation(N_init,param, print_warnings = True)
         G_simul.reaction_channel_list = reaction_channel_list
         
         #run multiple Gillespie simulationand average them
@@ -147,17 +147,17 @@ def compute_time_complexity(N_list, N_simul):
         
     
     
-        """ REGIR algorithm benchmarking"""
+        """ MOSAIC algorithm benchmarking"""
             #initialise reaction channels
         reaction_channel_list = []
-        channel = gil_REGIR.Reaction_channel(param,rate=r0, shape_param=6, distribution = 'Gamma')
+        channel = gil_MOSAIC.Reaction_channel(param,rate=r0, shape_param=6, distribution = 'Gamma')
         channel.reactants = ['A']
         channel.products = ['A']
         reaction_channel_list.append(channel)
         
         
         #initialise the Gillespie simulation
-        G_simul = gil_REGIR.Gillespie_simulation(N_init,param, print_warnings = True)
+        G_simul = gil_MOSAIC.Gillespie_simulation(N_init,param, print_warnings = True)
         G_simul.reaction_channel_list = reaction_channel_list
         
         #run multiple Gillespie simulationand average them
@@ -169,10 +169,10 @@ def compute_time_complexity(N_list, N_simul):
         
         wait_times = np.array(G_simul.reaction_channel_list[0].wait_times)
         Nreactions = len(wait_times)
-        time_REGIR.append(final_time)
-        nreac_REGIR.append(Nreactions)
+        time_MOSAIC.append(final_time)
+        nreac_MOSAIC.append(Nreactions)
         
-        print("For N=%s, REGIR elapsed time was %s seconds for %s simulations" % (N,time_REGIR[-1],param.N_simulations))
+        print("For N=%s, MOSAIC elapsed time was %s seconds for %s simulations" % (N,time_MOSAIC[-1],param.N_simulations))
         
         #G_simul.plot_inter_event_time_distribution()
         #G_simul.plot_populations(figsize = (8,4))
@@ -182,14 +182,14 @@ def compute_time_complexity(N_list, N_simul):
         """ Delay algorithm benchmarking"""
             #initialise reaction channels
         reaction_channel_list = []
-        channel = gil_REGIR.Reaction_channel(param,rate=r0, shape_param=6, distribution = 'Gamma', precompute_delay = True)
+        channel = gil_MOSAIC.Reaction_channel(param,rate=r0, shape_param=6, distribution = 'Gamma', precompute_delay = True)
         channel.reactants = ['A']
         channel.products = ['A']
         reaction_channel_list.append(channel)
         
         
         #initialise the Gillespie simulation
-        G_simul = gil_REGIR.Gillespie_simulation(N_init,param, print_warnings = True)
+        G_simul = gil_MOSAIC.Gillespie_simulation(N_init,param, print_warnings = True)
         G_simul.reaction_channel_list = reaction_channel_list
         
         #run multiple Gillespie simulationand average them
@@ -214,11 +214,11 @@ def compute_time_complexity(N_list, N_simul):
         
         
     np.save('Simulation_results/time_EXP.npy', time_Exp)
-    np.save('Simulation_results/time_REGIR.npy', time_REGIR)
+    np.save('Simulation_results/time_MOSAIC.npy', time_MOSAIC)
     np.save('Simulation_results/time_Delay.npy', time_Delay)
     
     np.save('Simulation_results/Nreac_EXP.npy', nreac_Exp)
-    np.save('Simulation_results/Nreac_REGIR.npy', nreac_REGIR)
+    np.save('Simulation_results/Nreac_MOSAIC.npy', nreac_MOSAIC)
     np.save('Simulation_results/Nreac_Delay.npy', nreac_Delay)
         
     

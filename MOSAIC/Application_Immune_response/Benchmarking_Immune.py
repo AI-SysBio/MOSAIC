@@ -9,7 +9,7 @@ from math import gamma, log
 import pickle
 from datetime import datetime
 
-import lib_REGIR_with_rate_function as gil
+import lib_MOSAIC_with_rate_function as gil
 from sortedcontainers import SortedDict
 
 
@@ -55,7 +55,7 @@ def main():
     
     
     if recompute:
-        time_REGIR = []
+        time_MOSAIC = []
         time_Gil = []
         time_DSSA = []
         for ni,N in enumerate(Nlist):
@@ -64,8 +64,8 @@ def main():
             
             if N < NlimSSA:
                 
-                tREGIR = simulate_system(N=N, Tend = Tend[ni], method = 'REGIR', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
-                print('  REGIR:', tREGIR)
+                tMOSAIC = simulate_system(N=N, Tend = Tend[ni], method = 'MOSAIC', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
+                print('  MOSAIC:', tMOSAIC)
                 tGil = simulate_system(N=N, Tend = Tend[ni], method = 'Gillespie', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
                 print('  Gillespie:', tGil)
                 #tGil2 = simulate_system(N=N, Tend = Tend[ni], method = 'Gillespie_sorted', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
@@ -73,33 +73,33 @@ def main():
                 tDelaySSA = simulate_system(N=N, Tend = Tend[ni]/3, method = 'DelaySSA', plot = False, constant_T = constant_Tcells)/Tend[ni]*100*3
                 print('  DelaySSA:', tDelaySSA)
                 
-                time_REGIR.append(tREGIR)
+                time_MOSAIC.append(tMOSAIC)
                 time_Gil.append(tGil)
                 time_DSSA.append(tDelaySSA)
             
             elif N<Nlim:
-                tREGIR = simulate_system(N=N, Tend = Tend[ni], method = 'REGIR', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
-                print('  REGIR:', tREGIR)
+                tMOSAIC = simulate_system(N=N, Tend = Tend[ni], method = 'MOSAIC', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
+                print('  MOSAIC:', tMOSAIC)
                 tGil = simulate_system(N=N, Tend = Tend[ni], method = 'Gillespie', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
                 print('  Gillespie:', tGil)
                 
-                time_REGIR.append(tREGIR)
+                time_MOSAIC.append(tMOSAIC)
                 time_Gil.append(tGil)
                 time_DSSA.append(np.nan)
             else:
-                tREGIR = simulate_system(N=N, Tend = Tend[ni], method = 'REGIR', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
-                print('  REGIR:', tREGIR)
-                time_REGIR.append(tREGIR)
+                tMOSAIC = simulate_system(N=N, Tend = Tend[ni], method = 'MOSAIC', plot = False, constant_T = constant_Tcells)/Tend[ni]*100
+                print('  MOSAIC:', tMOSAIC)
+                time_MOSAIC.append(tMOSAIC)
                 time_Gil.append(np.nan)
                 time_DSSA.append(np.nan)
                 
                 
-        np.save('time_REGIR.npy', time_REGIR)
+        np.save('time_MOSAIC.npy', time_MOSAIC)
         np.save('time_Gil.npy', time_Gil)
         np.save('time_DSSA.npy', time_DSSA)
     
     else:
-        time_REGIR = np.load('time_REGIR.npy')
+        time_MOSAIC = np.load('time_MOSAIC.npy')
         time_Gil = np.load('time_Gil.npy')
         time_DSSA = np.load('time_DSSA.npy')
         
@@ -107,27 +107,27 @@ def main():
     #manually adjust here:
     time_Gil = np.array(time_Gil)
     time_Gil = time_Gil/1.32
-    time_REGIR = np.array(time_REGIR)
+    time_MOSAIC = np.array(time_MOSAIC)
     time_DSSA = np.array(time_DSSA)
     time_DSSA = time_DSSA/1.32
     
     
     #plot fitted data here
-    fitted_REGIR = fit_log_line(Nlist,time_REGIR)
+    fitted_MOSAIC = fit_log_line(Nlist,time_MOSAIC)
     fitted_Gil = fit_log_line(Nlist[Nlist<Nlim][-3:],time_Gil[Nlist<Nlim][-3:])
     fitted_DSSA = fit_log_line(Nlist[Nlist<NlimSSA][-9:-1],time_DSSA[Nlist<NlimSSA][-9:-1])
     
     
     plt.figure(figsize = (7,4))
-    plt.scatter(Nlist, time_REGIR, s=60, color = 'red', label = r'REGIR')
-    plt.plot(Nlist, fitted_REGIR, lw=2, color = 'red', ls = '--')
+    plt.scatter(Nlist, time_MOSAIC, s=60, color = 'red', label = r'MOSAIC')
+    plt.plot(Nlist, fitted_MOSAIC, lw=2, color = 'red', ls = '--')
     plt.scatter(Nlist, time_Gil, s=60, color = 'black', label = r'SG')
     plt.scatter(Nlist, time_DSSA, s=60, color = 'blue', label = r'DelaySSA')
     #plt.fill_between(Nlist[-9:-1]/62, fitted_DSSA*0.5, fitted_DSSA*1.7, alpha = 0.15, color = 'red')
     #plt.fill_between(Nlist[:4], time_DSSA[:4]*0.5, time_DSSA[:4]*1.6, alpha = 0.15, color = 'red')
     plt.fill_between(Nlist, time_DSSA*0.6, time_DSSA*1.7, alpha = 0.15, color = 'blue')
     plt.fill_between(Nlist, time_Gil*0.6, time_Gil*1.7, alpha = 0.15, color = 'black')
-    plt.fill_between(Nlist, fitted_REGIR*0.6, fitted_REGIR*1.7, alpha = 0.15, color = 'red')
+    plt.fill_between(Nlist, fitted_MOSAIC*0.6, fitted_MOSAIC*1.7, alpha = 0.15, color = 'red')
     #plt.plot(Nlist, fitted_Gil, lw=2, color = 'green', ls = '--')
     plt.yscale('log')
     plt.xscale('log')
@@ -159,7 +159,7 @@ def affinity_function(a0=1):
 
 
 
-def simulate_system(N = 100, Tend = 20, method = 'REGIR', plot = True, constant_T = True):
+def simulate_system(N = 100, Tend = 20, method = 'MOSAIC', plot = True, constant_T = True):
     
     #initialize populations   
     sorted_Bcells = SortedDict()
@@ -220,7 +220,7 @@ def simulate_system(N = 100, Tend = 20, method = 'REGIR', plot = True, constant_
             
         
         
-    def simulate_REGIR(plot = True):
+    def simulate_MOSAIC(plot = True):
         
         def compute_propensities():
             a1 = NB*rB
@@ -632,8 +632,8 @@ def simulate_system(N = 100, Tend = 20, method = 'REGIR', plot = True, constant_
     
     
     
-    if method == 'REGIR':
-        return simulate_REGIR(plot = plot)
+    if method == 'MOSAIC':
+        return simulate_MOSAIC(plot = plot)
     elif method == 'Gillespie':
         return simulate_Gillespie(plot = plot)
     elif method == 'DelaySSA':

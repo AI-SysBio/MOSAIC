@@ -6,7 +6,7 @@ import matplotlib
 import sys
 matplotlib.rcParams.update({'font.size': 10})
 
-from lib_REGIR_IP_model import run_REGIR_simulation
+from lib_MOSAIC_IP_model import run_MOSAIC_simulation
 from lib_Spanning_tree import run_Spanning_tree_simulation
 from lib_ADM import run_ADM_simulation
 
@@ -23,12 +23,12 @@ def main():
     
         case = 'Basic'
         use_IP = False
-        print('REGIR %s, use_IP = %s' % (case ,use_IP))
+        print('MOSAIC %s, use_IP = %s' % (case ,use_IP))
         sim_time_basic = []
         for N in Nlist:
             print(N)
             tstart = time.time()
-            run_REGIR_simulation(N, Tend, case=case, use_IP=use_IP)
+            run_MOSAIC_simulation(N, Tend, case=case, use_IP=use_IP)
             tend = time.time()
             t_elapsed = tend - tstart
             print(t_elapsed)
@@ -42,12 +42,12 @@ def main():
             
         case = 'first_order'
         use_IP = False
-        print('REGIR %s, use_IP = %s' % (case ,use_IP))
+        print('MOSAIC %s, use_IP = %s' % (case ,use_IP))
         sim_time_1order = []
         for N in Nlist:
             print(N)
             tstart = time.time()
-            run_REGIR_simulation(N, Tend, case=case, use_IP=use_IP)
+            run_MOSAIC_simulation(N, Tend, case=case, use_IP=use_IP)
             tend = time.time()
             t_elapsed = tend - tstart
             print(t_elapsed)
@@ -62,12 +62,12 @@ def main():
     
         case = 'second_order'
         use_IP = False
-        print('REGIR %s, use_IP = %s' % (case ,use_IP))
+        print('MOSAIC %s, use_IP = %s' % (case ,use_IP))
         sim_time_2order = []
         for N in Nlist:
             print(N)
             tstart = time.time()
-            run_REGIR_simulation(N, Tend, case=case, use_IP=use_IP)
+            run_MOSAIC_simulation(N, Tend, case=case, use_IP=use_IP)
             tend = time.time()
             t_elapsed = tend - tstart
             print(t_elapsed)
@@ -81,12 +81,12 @@ def main():
 
         case = 'second_order'    
         use_IP = True
-        print('REGIR %s, use_IP = %s' % (case ,use_IP))
+        print('MOSAIC %s, use_IP = %s' % (case ,use_IP))
         sim_time_IP = []
         for N in Nlist:
             print(N)
             tstart = time.time()
-            run_REGIR_simulation(N, Tend, case=case, use_IP=use_IP)
+            run_MOSAIC_simulation(N, Tend, case=case, use_IP=use_IP)
             tend = time.time()
             t_elapsed = tend - tstart
             print(t_elapsed)
@@ -124,19 +124,19 @@ def main():
 
 
     color_dict = dict()
-    color_dict['REGIR_Basic'] = 'blue'
-    color_dict['REGIR_first'] = 'orange'
+    color_dict['MOSAIC_Basic'] = 'blue'
+    color_dict['MOSAIC_first'] = 'orange'
     color_dict['ADM'] = 'green'
     color_dict['tree'] = 'purple'
     
     
     plt.figure(figsize=(4,4))
-    plt.scatter(Nlist, sim_time_basic, label = 'REGIR-TN A', color = color_dict['REGIR_Basic'])
-    plt.plot(Nlist, sim_time_basic, color = color_dict['REGIR_Basic'], ls = '--')
-    plt.scatter(Nlist, sim_time_1order, label = 'REGIR-TN B', color = color_dict['REGIR_first'])
-    plt.plot(Nlist, sim_time_1order, color = color_dict['REGIR_first'], ls = '--')
-    #plt.scatter(Nlist, sim_time_2order, label = 'REGIR C')
-    #plt.scatter(Nlist, sim_time_IP, label = 'REGIR D')
+    plt.scatter(Nlist, sim_time_basic, label = 'MOSAIC-TN A', color = color_dict['MOSAIC_Basic'])
+    plt.plot(Nlist, sim_time_basic, color = color_dict['MOSAIC_Basic'], ls = '--')
+    plt.scatter(Nlist, sim_time_1order, label = 'MOSAIC-TN B', color = color_dict['MOSAIC_first'])
+    plt.plot(Nlist, sim_time_1order, color = color_dict['MOSAIC_first'], ls = '--')
+    #plt.scatter(Nlist, sim_time_2order, label = 'MOSAIC C')
+    #plt.scatter(Nlist, sim_time_IP, label = 'MOSAIC D')
     plt.scatter(Nlist, sim_time_spanning, label = 'Spanning Tree', color = color_dict['tree'])
     plt.plot(Nlist, sim_time_spanning, color = color_dict['tree'], ls = '--')
     plt.scatter(Nlist, sim_time_ADM, label = 'AD modeling', color = color_dict['ADM'])
