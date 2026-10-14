@@ -266,46 +266,6 @@ def main():
     G_metrics = G_metrics[:, nkeep]
     
     
-    #Adding additional metrics computed from another study, introduce some std
-    manual_add = ['ETN_autosim']
-    manual_dev_ETN_autosim = [0.73, 0.825, 3.26, 1.87] #MOSAIC-A, MOSAIC-B, Spanning, ADM
-    std_factor = [10,10,3,7]
-    to_add = [manual_dev_ETN_autosim]
-    
-    #Maybe add flow metrics later
-    
-    nplot += manual_add
-    new_G_metrics = np.zeros((G_metrics.shape[0], G_metrics.shape[1]+len(manual_add)))
-    new_G_metrics[:,:G_metrics.shape[1]] = G_metrics
-    
-    def draw_score(mean,std):
-        return np.random.normal(mean, std)
-    
-    manual_dev_dict = dict()
-    names = ['Sim_REGIR_Basic', 'Sim_REGIR_first_order', 'Sim_spanning_tree', 'Sim_ADM_V9']
-    for mi,metrics in enumerate(manual_add):
-        to_add[mi] = to_add[mi]/np.mean(to_add[mi])
-        global_std = np.std(to_add[mi])
-        for ni,network in enumerate(network_list):
-            if 'ADM' in network:
-                li = 3
-            elif 'spanning' in network:
-                li = 2
-            elif 'first_order' in network:
-                li = 1
-            elif 'Basic' in network:
-                li = 0
-            else:
-                li = -1
-            if li >=0:
-                local_std = global_std/std_factor[li]
-                score = np.random.normal(to_add[mi][li], local_std)
-                new_G_metrics[ni, G_metrics.shape[1] + mi] = score
-
-    print(new_G_metrics.shape)
-    
-    
-    G_metrics = new_G_metrics
     #G_metrics = normalize_around_ref(G_metrics)
     #sys.exit()
     

@@ -222,21 +222,16 @@ def main():
     
     
 
-    time_nMGA = time_MOSAIC**2.02 * 115
-    time_nMGA[time_nMGA>2e3] = np.nan
         
     #B_list_ = B_list
     #B_list = B_list[7:]
     fitted_Exp = fit_log_line(B_list,time_Exp)
     fitted_MOSAIC = fit_log_line(B_list,time_MOSAIC)
     fitted_Delay = fit_log_line(B_list,time_Delay)
-    fitted_nMGA = fit_log_line(B_list[:-2],time_nMGA[:-2])
     
     
     
     plt.figure(figsize = (7,4))
-    plt.scatter(B_list[7:], time_nMGA[7:], s=35, color = 'green', label = r'nMGA (gamma, $\alpha=3$)', edgecolor = 'black')
-    plt.plot(B_list[7:-2], fitted_nMGA[7:], lw=2, color = 'green', ls = '--')
     plt.scatter(B_list, time_Delay, s=35, color = 'blue', label = r'DelaySSA (gamma, $\alpha=3$)', edgecolor = 'black')
     #plt.scatter(B_list, time_Exp, s=60, color = 'blue', label = 'SG (exponential)')
     #plt.plot(B_list, fitted_Exp, lw=2, color = 'blue', ls = '--')
@@ -245,14 +240,10 @@ def main():
     plt.scatter(B_list, time_MOSAIC10, s=35, color = 'orange', label = r'MOSAIC (gamma, $\alpha=3$, $N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
     #plt.plot(B_list, fitted_Delay, lw=2, color = 'red', ls = '--')
     #plt.plot(N_list, N_list*np.log(N_list)/1e5, lw=2, color = 'red' )
-    plt.fill_between(B_list, time_Delay*0.85, time_Delay*1.15, alpha = 0.2, color = 'blue')
-    plt.fill_between(B_list, time_MOSAIC*0.85, time_MOSAIC*1.15, alpha = 0.2, color = 'red')
-    plt.fill_between(B_list[7:], time_nMGA[7:]*0.85, time_nMGA[7:]*1.15, alpha = 0.2, color = 'green')
-    plt.fill_between(B_list[:7], time_MOSAIC10[:7]*0.85, time_MOSAIC10[:7]*1.15, alpha = 0.2, color = 'orange')
     
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel(r'$\beta$ paremeter')
+    plt.xlabel(r'$\beta$ parameter')
     plt.ylabel('Mean time / simulation [s]')
     plt.ylim(8e-7,3e3)
     plt.xlim(8e-3,1e5)
@@ -278,10 +269,6 @@ def main():
     plt.scatter(B_list, time_MOSAIC10, s=60, color = 'orange', label = r'MOSAIC (gamma, $\alpha=3$, $N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
     #plt.plot(B_list, fitted_Delay, lw=2, color = 'red')
     #plt.plot(B_list, N_list*np.log(N_list)/1e5, lw=2, color = 'red' )
-    plt.fill_between(B_list, time_Exp*0.9, time_Exp*1.1, alpha = 0.1, color = 'black')
-    plt.fill_between(B_list, time_Delay*0.9, time_Delay*1.1, alpha = 0.1, color = 'blue')
-    plt.fill_between(B_list, time_MOSAIC*0.9, time_MOSAIC*1.1, alpha = 0.1, color = 'red')
-    plt.fill_between(B_list[:7], time_MOSAIC10[:7]*0.85, time_MOSAIC10[:7]*1.15, alpha = 0.1, color = 'orange')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel(r'$\beta$ parameter')

@@ -104,15 +104,12 @@ def main():
         time_DSSA = np.load('time_DSSA.npy')
         
         
-    #manually adjust here:
     time_Gil = np.array(time_Gil)
-    time_Gil = time_Gil/1.32
     time_MOSAIC = np.array(time_MOSAIC)
     time_DSSA = np.array(time_DSSA)
-    time_DSSA = time_DSSA/1.32
     
     
-    #plot fitted data here
+    # power-law fits restricted to the asymptotic (largest N) part of each curve
     fitted_MOSAIC = fit_log_line(Nlist,time_MOSAIC)
     fitted_Gil = fit_log_line(Nlist[Nlist<Nlim][-3:],time_Gil[Nlist<Nlim][-3:])
     fitted_DSSA = fit_log_line(Nlist[Nlist<NlimSSA][-9:-1],time_DSSA[Nlist<NlimSSA][-9:-1])
@@ -123,11 +120,6 @@ def main():
     plt.plot(Nlist, fitted_MOSAIC, lw=2, color = 'red', ls = '--')
     plt.scatter(Nlist, time_Gil, s=60, color = 'black', label = r'SG')
     plt.scatter(Nlist, time_DSSA, s=60, color = 'blue', label = r'DelaySSA')
-    #plt.fill_between(Nlist[-9:-1]/62, fitted_DSSA*0.5, fitted_DSSA*1.7, alpha = 0.15, color = 'red')
-    #plt.fill_between(Nlist[:4], time_DSSA[:4]*0.5, time_DSSA[:4]*1.6, alpha = 0.15, color = 'red')
-    plt.fill_between(Nlist, time_DSSA*0.6, time_DSSA*1.7, alpha = 0.15, color = 'blue')
-    plt.fill_between(Nlist, time_Gil*0.6, time_Gil*1.7, alpha = 0.15, color = 'black')
-    plt.fill_between(Nlist, fitted_MOSAIC*0.6, fitted_MOSAIC*1.7, alpha = 0.15, color = 'red')
     #plt.plot(Nlist, fitted_Gil, lw=2, color = 'green', ls = '--')
     plt.yscale('log')
     plt.xscale('log')

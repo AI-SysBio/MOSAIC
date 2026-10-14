@@ -85,6 +85,24 @@ are snapshots of the core library extended with the hooks each application neede
 (Anderson scheme and Hes1 rate functions; custom reactions and Pareto waiting times).
 They are kept as used for the paper so that the results can be reproduced exactly.
 
+## Changes relative to the code used for the paper
+
+The scripts in this repository were cleaned up after publication (October 2026). Two
+changes affect numerical results and are documented here for transparency:
+
+- **Population recording.** The simulation loop recorded the state *after* an event at
+  grid points that lie *before* that event. The recorded trajectories therefore differed
+  from the exact state in a way that depended on the step size (and so on the method),
+  while the simulated dynamics themselves were correct. This is fixed in all libraries
+  and covered by `tests/test_recording.py`. The accuracy comparison of the delay
+  application (`Model_benchmark_accuracy.py`) is the result most affected, and its
+  precomputed data were regenerated with the corrected code.
+- **Plotting scripts plot measured data only.** Scaling factors, hand-set corrections
+  and extrapolated points that had been applied to some plotted values were removed, and
+  the nMGA curve of the delay application is no longer drawn because no nMGA
+  implementation is part of this repository. The regenerated panels can differ from the
+  published figures in these respects; the raw timings and trajectories are unchanged.
+
 ## Repository layout
 
 ```

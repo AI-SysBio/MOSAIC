@@ -165,14 +165,10 @@ def main():
             
         return population
     
-    B_list = np.logspace(0,14,num = 15, base=2).astype(int)    
+    # beta values and number of realisations of the precomputed data in Saved_pop/
+    # (the number of realisations decreases with beta because the system size grows with it)
     B_list = [0.01, sqrt(10)/100, 0.1, sqrt(10)/10, 1, sqrt(10), 10, 10*sqrt(10), 100]
-    B_list = [0.01, sqrt(10)/100, 0.1, sqrt(10)/10, 1, sqrt(10)]
-    Nsims = np.array([1e5, 5e4, 5e4, 2e4, 1e4, 1e4]).astype(int)
-    
-    
-    B_list = [0.01, sqrt(10)/100, 0.1, sqrt(10)/10, 1, sqrt(10)]
-    Nsims = np.array([1e5, 5e4, 5e4, 2e4, 1e4, 1e4]).astype(int)
+    Nsims = np.array([1e5, 5e4, 5e4, 2e4, 1e4, 1e4, 100, 31, 10]).astype(int)
     
     
     RMSD_baseline_array = []
@@ -209,13 +205,18 @@ def main():
             
             
             
+            print('    MOSAIC (f=10)...')
+            pop_MOSAIC10 = run_simulation(Nsim = Nsim, beta = Beta, method = 'MOSAIC', plot_pop = False, f=10)
+            
             Mpop_d1_ = pop_delaySSA1[:,:,1].mean(axis=0)
             Mpop_d2_ = pop_delaySSA2[:,:,1].mean(axis=0)
             Mpop_r_ = pop_MOSAIC[:,:,1].mean(axis=0)
+            Mpop_r10_ = pop_MOSAIC10[:,:,1].mean(axis=0)
             
             np.save('Saved_pop/delay1_%s_%s.npy' % (Beta,Nsim), Mpop_d1_)
             np.save('Saved_pop/delay2_%s_%s.npy' % (Beta,Nsim), Mpop_d2_)
             np.save('Saved_pop/mosaic_%s_%s.npy' % (Beta,Nsim), Mpop_r_)
+            np.save('Saved_pop/mosaic10_%s_%s.npy' % (Beta,Nsim), Mpop_r10_)
             
             #may have to save discretized means when running the simulation instead of all populations
             #(it was cauzing problems cauze the population array is too large)
@@ -225,13 +226,10 @@ def main():
             Mpop_d2_ = np.load('Saved_pop/delay2_%s_%s.npy' % (Beta,Nsim))
             Mpop_r_ = np.load('Saved_pop/mosaic_%s_%s.npy' % (Beta,Nsim))
             
-            if False:
-                print('    MOSAIC (f=10)...')
-                pop_MOSAIC = run_simulation(Nsim = Nsim, beta = Beta, method = 'MOSAIC', plot_pop = False, f=10)
-                Mpop_r10_ = pop_MOSAIC[:,:,1].mean(axis=0)
-                np.save('Saved_pop/mosaic10_%s_%s.npy' % (Beta,Nsim), Mpop_r10_)
-            else:
+            if os.path.exists('Saved_pop/mosaic10_%s_%s.npy' % (Beta,Nsim)):
                 Mpop_r10_ = np.load('Saved_pop/mosaic10_%s_%s.npy' % (Beta,Nsim))
+            else:  # the f=10 variant was not run for the largest systems
+                Mpop_r10_ = np.full_like(Mpop_r_, np.nan)
             
             
         print('Saved_pop/delay1_%s_%s.npy' % (Beta,Nsim))
@@ -277,53 +275,10 @@ def main():
     RMSD11_array = np.array(RMSD11_array)
     RMSD12_array = np.array(RMSD12_array)
     
-    #manual correction
-    RMSD1_array[-1] *= 0.7
-    RMSD2_array[-1] *= 0.9
-    
-    RMSD1_array[0] *= 1.2
-    RMSD2_array[0] *= 1.13
-    RMSD_baseline_array[-2] *= 0.9
-    
-    RMSD_baseline_array[-4] *= 1.3
-    RMSD_baseline_array[-3] *= 1.2
-    
-    RMSD_baseline_array[0]*= 0.9
-    
-    RMSD11_array[0] /= 30
-    RMSD12_array[0] /= 25
-    
-    RMSD11_array[1] /= 16
-    RMSD12_array[1] /= 13.2
-    
-    RMSD11_array[2] /= 5.7
-    RMSD12_array[2] /= 5
-    
-    RMSD11_array[3] /= 1.6
-    RMSD12_array[3] /= 1.4
-    
-    RMSD11_array[4] /= 1.4
-    RMSD12_array[4] /= 1.6
-    
-    RMSD11_array[5] /= 1.4
-    RMSD12_array[5] /= 0.8
-    
-    RMSD11_array[:3]
-    RMSD12_array[:3]
-    
-    np.random.seed(5)
-    B_list = np.array(B_list + [10, 10*sqrt(10), 100, 100*sqrt(10), 1000, 1000*sqrt(10), 10000, 10000*sqrt(10)])
-    RMSD_baseline_array = np.array(list(RMSD_baseline_array) + list(np.ones(8)*np.mean(RMSD_baseline_array)*(1-(0.5-np.random.random(8))/4)))
-    RMSD1_array = np.array(list(RMSD1_array) + list(np.ones(8)*np.mean(RMSD_baseline_array)*(1-(0.5-np.random.random(8))/2)))
-    RMSD2_array = np.array(list(RMSD2_array) + list(np.ones(8)*np.mean(RMSD_baseline_array)*(1-(0.5-np.random.random(8))/2)))
-    RMSD11_array = np.array(list(RMSD11_array) + list(np.ones(8)*np.mean(RMSD_baseline_array)*(1-(0.5-np.random.random(8))/2)))
-    RMSD12_array = np.array(list(RMSD12_array) + list(np.ones(8)*np.mean(RMSD_baseline_array)*(1-(0.5-np.random.random(8))/2)))
-    
+    B_list = np.array(B_list)
 
-    RMSD12_array[11] /= 0.95
-    RMSD12_array[9] /= 1.1
-    
-    plt.fill_between([1e-3,1e6], [0,0], [0.0075,0.0075], color = 'black', alpha = 0.05)
+    # shaded area: RMSD between two independent DelaySSA runs (sampling noise floor)
+    plt.axhspan(0, np.nanmax(RMSD_baseline_array), color = 'black', alpha = 0.05)
     plt.plot(B_list, RMSD_baseline_array, color = 'black', lw=1.5, ls = '--')
     plt.scatter(B_list, RMSD11_array, color = 'orange', s=60, label = r'MOSAIC ($N\lambda_{max} \geq 20\lambda_0$)', edgecolor = 'black')
     plt.scatter(B_list, RMSD12_array, color = 'orange', s=60, edgecolor = 'black')

@@ -440,6 +440,8 @@ class Gillespie_simulation():
         ti = 0
         self.Tend = Tend
         self.population_t = -np.ones((timepoints,len(self.reactant_population)+1))
+        # state that holds during the current step; recorded when the step crosses a grid point
+        prev_state = list(self.reactant_population.values())
         
         if delay_method == 'Anderson':
             M = len(self.reaction_channel_list)
@@ -455,8 +457,8 @@ class Gillespie_simulation():
                 if reaction_channel.r0_function is not None:
                     reaction_channel.rate  = reaction_channel.r0_function(self.reactant_population, self.t)
         
-            if self.t >= ti*Tend/timepoints: #record the populations
-                self.population_t[ti,:-1] = list(self.reactant_population.values())
+            if self.t >= ti*Tend/timepoints: #record the populations (state that held up to the last event)
+                self.population_t[ti,:-1] = prev_state
                 ti = int(self.t/Tend*(timepoints))+1
                 
                 
@@ -465,6 +467,7 @@ class Gillespie_simulation():
                 ancestors = [self.Ancestor[cell.id] for cell in Bcells]
                 self.ancestor_dict[ti] = [ancestors, affinities]
                 
+            prev_state = list(self.reactant_population.values())
             a_array = self.compute_propensities()
             a0 = np.sum(a_array)
             
@@ -524,6 +527,8 @@ class Gillespie_simulation():
                 
                 
            
+        if ti < timepoints: #the state of the last step holds until Tend
+            self.population_t[ti,:-1] = prev_state
         self.population_t = interpolate_minusones(self.population_t)
         self.population_t[:,-1] = np.sum(self.population_t, axis = 1)
         

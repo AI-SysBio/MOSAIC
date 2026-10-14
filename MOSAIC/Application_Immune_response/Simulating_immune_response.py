@@ -52,6 +52,14 @@ rinteract = 1
 
 N_init = {'B':100, 'T':10, 'Bdiv':0, '[BT]':0}
 
+# Conversion of simulation timepoints to days after immunization used in all plots:
+# the simulation starts at GC seeding (day 6) and each recorded timepoint is half a day.
+DAY_OF_SEEDING = 6
+DAYS_PER_TIMEPOINT = 0.5
+
+def timepoint_to_days(ti):
+    return np.asarray(ti)*DAYS_PER_TIMEPOINT + DAY_OF_SEEDING
+
 class param:
     Tend = 100
     unit = 'h'
@@ -290,9 +298,9 @@ def main():
         
         
         #B cell affinity evolving through time:
-        mean_affinity = np.array([np.mean(G_simul.ancestor_dict[ti][1]) for ti in range(1,param.timepoints)])*1.3
-        std_affinity = np.array([np.std(G_simul.ancestor_dict[ti][1]) for ti in range(1,param.timepoints)])*1.3
-        time = np.arange(1,param.timepoints)
+        mean_affinity = np.array([np.mean(G_simul.ancestor_dict[ti][1]) for ti in range(1,param.timepoints)])
+        std_affinity = np.array([np.std(G_simul.ancestor_dict[ti][1]) for ti in range(1,param.timepoints)])
+        time = timepoint_to_days(np.arange(1,param.timepoints))
         plt.plot(time, mean_affinity)
         plt.fill_between(time, mean_affinity-std_affinity, mean_affinity+std_affinity, alpha = 0.3)
         plt.xlim(0,50)
@@ -316,7 +324,7 @@ def main():
                     affinity.append(np.array(G_simul.ancestor_dict[ti][1])[nwhere])
                 ti += 1
                 
-            x_array = np.arange(param.timepoints)/2+6
+            x_array = timepoint_to_days(np.arange(param.timepoints))
             x_array = x_array[:len(norm_pop)]
             plt.plot(x_array, np.array(norm_pop), label = 'Clone %s' % (a+1))
             
@@ -339,7 +347,7 @@ def main():
                     affinity.append(np.mean(np.array(G_simul.ancestor_dict[ti][1])[nwhere]))
                 ti += 1
                 
-            x_array = np.arange(param.timepoints)/2+6
+            x_array = timepoint_to_days(np.arange(param.timepoints))
             x_array = x_array[:len(affinity)]
             plt.plot(x_array, np.array(affinity), label = 'Clone %s' % (a+1))
             
@@ -384,9 +392,9 @@ def main():
             
     
     for max_pop in all_max_pop:
-        plt.plot(np.arange(param.timepoints)/2+6, max_pop, color = sns.color_palette()[0], alpha = 0.5, lw = 0.5)
+        plt.plot(timepoint_to_days(np.arange(param.timepoints)), max_pop, color = sns.color_palette()[0], alpha = 0.5, lw = 0.5)
     all_max_pop = np.array(all_max_pop)
-    plt.plot(np.arange(param.timepoints)/2+6, all_max_pop.mean(axis=0), lw=2.5, color='blue', label = 'Av. simulation')
+    plt.plot(timepoint_to_days(np.arange(param.timepoints)), all_max_pop.mean(axis=0), lw=2.5, color='blue', label = 'Av. simulation')
     plt.xlabel('Days after immunization')
     plt.ylabel('Dominance')   
     
