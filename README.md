@@ -131,7 +131,3 @@ Related work:
 [1] Pélissier A., Phan M., Beerenwinkel N., Rodríguez Martínez M. Gillespie-based simulation and inference for non-Markovian stochastic reaction networks. *Briefings in Bioinformatics* **27**(5), bbag486 (2026). doi:[10.1093/bib/bbag486](https://doi.org/10.1093/bib/bbag486)
 
 [2] Pélissier A., Phan M., Le Bail D., Beerenwinkel N., Rodríguez Martínez M. Unifying non-Markovian dynamics and agent heterogeneity in scalable stochastic networks. *Nature Communications* **17**, 3345 (2026). doi:[10.1038/s41467-026-69817-y](https://doi.org/10.1038/s41467-026-69817-y)
-
-## License
-
-MIT, see [LICENSE](LICENSE).
