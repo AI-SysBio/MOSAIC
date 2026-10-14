@@ -33,26 +33,22 @@ the results of the paper:
 > *Nature Communications* 17, 3345 (2026). https://doi.org/10.1038/s41467-026-69817-y
 
 &nbsp;
+## Scope of this repository
 
-## Which implementation should I use?
+A general, pip-installable implementation of the non-Markovian Gillespie method
+(rejection scheme, Laplace Gillespie and DelaySSA, eight waiting-time distributions) is
+maintained separately as [NoMaSS](https://github.com/AI-SysBio/NoMaSS)
+(`pip install nomass`). Use it to simulate your own reaction networks.
 
-| | [NoMaSS](https://github.com/AI-SysBio/NoMaSS) (`pip install nomass`) | This repository |
-|---|---|---|
-| Purpose | Maintained library for everyday use | Reference code and reproducibility archive of the paper |
-| Rejection method (MOSAIC / REGIR) | yes | yes |
-| Laplace Gillespie and DelaySSA | yes | DelaySSA only (`precompute_delay=True`) |
-| Agent-level properties and custom reactions | yes | yes (`Application_Immune_response`) |
-| MOSAIC-TN (temporal networks with memory and activity) | no | yes (`Application_Temporal_network`) |
-| Benchmarks and figures of the paper | partly (its own paper) | all three applications |
+This repository is focused on the systems studied in the paper, in particular the two
+features that are specific to MOSAIC: **agents with individual properties** (clonal
+B cell competition) and **MOSAIC-TN**, the temporal network model with memory and
+individual activity (bursty human interactions). It contains the code, the data and the
+precomputed results needed to reproduce every figure.
 
-If you simply want to simulate a non-Markovian reaction network, start with NoMaSS. Use
-this repository to reproduce the paper, to simulate temporal networks with MOSAIC-TN, or
-as a compact single-file implementation to build on.
+## Setup
 
-## Installation
-
-The core library is the single file [`MOSAIC/MOSAIC.py`](MOSAIC/MOSAIC.py) and only needs
-NumPy, SciPy, Matplotlib, seaborn and `sortedcontainers`. Python 3.9 or later is required.
+Python 3.9 or later. Clone the repository and install the dependencies:
 
 ```bash
 git clone https://github.com/AI-SysBio/MOSAIC.git
@@ -60,102 +56,9 @@ cd MOSAIC
 pip install -r requirements.txt
 ```
 
-Check the installation by running the test suite or the toy example:
-
-```bash
-pytest
-```
-
-```bash
-python MOSAIC/Toy_example.py
-```
-
-## Quick start
-
-A system with three species, two non-Markovian channels and one bimolecular Poisson
-channel (the full script is [`MOSAIC/Toy_example.py`](MOSAIC/Toy_example.py)):
-
-```python
-import MOSAIC as mosaic
-
-# Simulation parameters
-class param:
-    Tend = 10             # length of the simulation
-    N_simulations = 20    # results are averaged over this many realisations
-    unit = 'h'            # unit of time (plots only)
-    timepoints = 100      # number of recorded timepoints (plots only)
-
-# Reaction channels: rate = 1/mean inter-event time, shape_param sets the dispersion
-reaction1 = mosaic.Reaction_channel(param, rate=1, shape_param=20, distribution='Gamma', name='A -> B')
-reaction1.reactants = ['A']
-reaction1.products = ['B']
-
-reaction2 = mosaic.Reaction_channel(param, rate=4, shape_param=5, distribution='Weibull', name='B -> C + A')
-reaction2.reactants = ['B']
-reaction2.products = ['C', 'A']
-
-reaction3 = mosaic.Reaction_channel(param, rate=0.03, name='A + B -> 0')   # two reactants: Poisson process
-reaction3.reactants = ['A', 'B']
-reaction3.products = []
-
-# Initial population and simulation
-N_init = {'A': 300, 'B': 0, 'C': 0}
-G_simul = mosaic.Gillespie_simulation(N_init, param)
-G_simul.reaction_channel_list = [reaction1, reaction2, reaction3]
-populations = G_simul.run_simulations(param.Tend, verbose=True, seed=0)
-# populations has shape (N_simulations, timepoints, n_species + 1); the last column is the total
-
-G_simul.plot_inter_event_time_distribution()
-G_simul.plot_populations()
-```
-
-The run takes a few seconds and produces the figures below (pass `verbose=False` to
-silence the progress output):
-
-<p align="center">
-  <img src="Figures/MOSAIC_test.png" width="800">
-</p>
-
-The oscillations caused by the non-Markovian dynamics are clearly visible. The
-*theoretical* and *simulated* inter-event time distributions do not match exactly, even
-with many realisations, because A and B are reactants of two channels at the same time.
-The theoretical curve is the distribution a channel would have if it were the only
-process acting on that reactant. This is expected in non-Markovian systems; the accuracy
-of the method itself is characterised in the paper and in [`MOSAIC/Benchmark`](MOSAIC/Benchmark).
-
-## Implemented distributions
-
-Every channel is parameterised by a `rate` and a dimensionless `shape_param`:
-
-| `distribution` | `rate` | `shape_param` | Notes |
-|---|---|---|---|
-| `Exponential` | 1/mean | ignored | Markovian (standard Gillespie) |
-| `Gamma` | 1/mean | α (shape) | α < 1 requires `precompute_delay=True` |
-| `Weibull` | 1/mean | k (shape) | k < 1 requires `precompute_delay=True` |
-| `Normal` | 1/mean | std/mean | |
-| `LogNormal` | 1/mean | std/mean | |
-| `Cauchy` | 1/median | γ (scale) | |
-| `Pareto` | 1/mean | α (tail index) | application libraries only (immune response, temporal networks) |
-
-Non-Markovian waiting times are defined for channels with exactly one reactant, since
-the inter-event time of a channel with several reactants is ambiguous. Channels with
-zero or several reactants are simulated as Poisson processes.
-
-Useful options of `Reaction_channel`:
-
-- `precompute_delay=True` draws the waiting time of each agent when it is created and
-  stores it in a sorted queue (the DelaySSA scheme). It is exact for any distribution,
-  including those with a diverging hazard at t = 0, at the cost of O(N log N) scaling.
-- `transfer_identity=True` keeps the identity (and the internal clock) of a reactant that
-  also appears among the products, for example `M -> M + P`.
-- `min_ratio` (argument of `Gillespie_simulation`) controls the accuracy of the
-  rejection step: the proposal rate is kept at least `min_ratio` times larger than the
-  rate of the slowest channel (see the paper for the error bound).
-
-Agent-level properties, state-dependent rates (`r0_function`) and custom reaction
-functions (`perform_reaction_custom`) are implemented in
-[`Application_Immune_response/lib_REGIR_with_rate_function.py`](MOSAIC/Application_Immune_response/lib_REGIR_with_rate_function.py)
-and documented in that folder.
+The core algorithm is the single file [`MOSAIC/MOSAIC.py`](MOSAIC/MOSAIC.py);
+[`MOSAIC/Toy_example.py`](MOSAIC/Toy_example.py) shows the API on a small
+three-species system and `pytest` runs a few smoke tests of the library.
 
 ## Reproducing the results of the paper
 
