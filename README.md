@@ -38,7 +38,7 @@ the results of the paper:
 A general, pip-installable implementation of non-Markovian Gillespie methods
 (rejection scheme, Laplace Gillespie and DelaySSA, eight waiting-time distributions) is
 maintained separately as [NoMaSS](https://github.com/AI-SysBio/NoMaSS)
-(`pip install nomass`). Use it to simulate your own reaction networks.
+(`pip install nomass`)[1]. Use it to simulate your own reaction networks.
 
 This repository is focused on the systems studied in the paper, in particular the two
 features that are specific to MOSAIC: **agents with individual properties** (clonal
@@ -125,6 +125,12 @@ Related work:
   described in Pélissier A., Phan M., Beerenwinkel N., Rodríguez Martínez M.,
   *Gillespie-based simulation and inference for non-Markovian stochastic reaction networks*,
   Briefings in Bioinformatics 27(5), bbag486 (2026). https://doi.org/10.1093/bib/bbag486
+
+## References
+
+[1] Pélissier A., Phan M., Beerenwinkel N., Rodríguez Martínez M. Gillespie-based simulation and inference for non-Markovian stochastic reaction networks. *Briefings in Bioinformatics* **27**(5), bbag486 (2026). doi:[10.1093/bib/bbag486](https://doi.org/10.1093/bib/bbag486)
+
+[2] Pélissier A., Phan M., Le Bail D., Beerenwinkel N., Rodríguez Martínez M. Unifying non-Markovian dynamics and agent heterogeneity in scalable stochastic networks. *Nature Communications* **17**, 3345 (2026). doi:[10.1038/s41467-026-69817-y](https://doi.org/10.1038/s41467-026-69817-y)
 
 ## License
 
