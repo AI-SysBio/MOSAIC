@@ -23,9 +23,8 @@ Run from this folder, for example:
 python Model_benchmark_cost.py
 ```
 
-Both scripts use `lib_MOSAIC_with_delay.py`, a snapshot of the core library that
-additionally implements the Anderson (modified next-reaction) scheme used for
-DelaySSA and the Hes1 rate functions (`RNA_rate_function`,
-`RNA_delay_rate_function`). The model follows the Hes1 delayed feedback loop of Monk (2003); references and
+Both scripts use `lib_MOSAIC_with_delay.py`, a subclass of the core library whose
+`update_rates` hook sets the initiation and elongation rates from the current protein
+level at every step (`RNA_rate_function`, `RNA_delay_rate_function`). The model follows the Hes1 delayed feedback loop of Monk (2003); references and
 parameter sources are listed in the docstrings at the top of each script.
 Regenerating all precomputed data takes several hours.

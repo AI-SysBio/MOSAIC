@@ -58,7 +58,7 @@ pip install -r requirements.txt
 
 The core algorithm is the single file [`MOSAIC/MOSAIC.py`](MOSAIC/MOSAIC.py);
 [`MOSAIC/Toy_example.py`](MOSAIC/Toy_example.py) shows the API on a small
-three-species system and `pytest` runs a few smoke tests of the library.
+three-species system and `pytest` runs the unit and regression tests of the libraries.
 
 ## Reproducing the results of the paper
 
@@ -80,10 +80,11 @@ redrawn in seconds.
   <img src="Figures/Social_interactions.png" width="35%">
 </p>
 
+All applications run on the single core library [`MOSAIC/MOSAIC.py`](MOSAIC/MOSAIC.py).
 The two application libraries (`lib_MOSAIC_with_delay.py`, `lib_MOSAIC_with_rate_function.py`)
-are snapshots of the core library extended with the hooks each application needed
-(Anderson scheme and Hes1 rate functions; custom reactions and Pareto waiting times).
-They are kept as used for the paper so that the results can be reproduced exactly.
+are short subclasses that add the model-specific parts (the Hes1 feedback rates; the
+per-cell affinities and clones of the germinal center). `tests/test_regression.py`
+checks every library code path against stored runs, bit for bit.
 
 ## Repository layout
 
@@ -96,7 +97,7 @@ MOSAIC/
 ├── Application_Immune_response/     clonal B cell competition (agent properties)
 └── Application_Temporal_network/    MOSAIC-TN temporal networks
 Figures/                             figures used in this README
-tests/                               pytest smoke tests of the core library
+tests/                               unit tests and seeded regression runs (tests/golden) of the libraries
 ```
 
 ## Citation

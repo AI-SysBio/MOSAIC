@@ -19,15 +19,13 @@ Run from this folder:
 python Simulating_immune_response.py
 ```
 
-The scripts use `lib_MOSAIC_with_rate_function.py`, a snapshot of the core library that
-adds:
-
-- `perform_reaction_custom`: a user function called instead of the default
-  bookkeeping, used here to transfer affinities and clone identity to daughter cells,
-- `r0_function`: a rate that depends on the system state,
-- the Pareto distribution,
-- `Gillespie_simulation.get_random_element(..., weights=...)` for affinity-weighted
-  selection of reactants.
+The scripts use `lib_MOSAIC_with_rate_function.py`, a subclass of the core library
+that draws the initial affinities and founder clones (`on_reinitialize`) and stores the
+clone and affinity of every B cell at each recorded timepoint (`record_extra`). The
+generic machinery lives in the core: `perform_reaction_custom` (a user function called
+instead of the default bookkeeping, used here to transfer affinities and clone identity
+to daughter cells), `r0_function` (state-dependent rates), the Pareto distribution and
+`get_random_element(..., weights=...)` for weighted selection of reactants.
 
 Per-cell attributes are stored in plain dictionaries attached to the simulation object
 (`G_simul.Bcell_affinity`, `G_simul.Ancestor`) and keyed by the reactant UUID.

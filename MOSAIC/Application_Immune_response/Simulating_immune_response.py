@@ -74,6 +74,203 @@ def affinity_function(a0=0.5, Nstep = 10):
     return new_val
 
 
+def perform_reaction_division(G_simul, forced_ID = None): #Bdiv -> B + B
+    
+    if forced_ID is None:
+        index, reactant = G_simul.get_random_element(G_simul.reactant_list['Bdiv'])
+        reactantID = reactant.id
+    else:
+        index = G_simul.find_in_reactant_list(G_simul.reactant_list['Bdiv'], forced_ID) #Really need to optimize this function
+        reactantID = forced_ID
+                
+    #update populations
+    product1 = gil.Reactant()
+    product2 = gil.Reactant()
+    G_simul.reactant_list['Bdiv'].pop(index)
+    G_simul.reactant_population['Bdiv'] -= 1
+    G_simul.reactant_list['B'].append(product1)
+    G_simul.reactant_list['B'].append(product2)
+    G_simul.reactant_population['B'] += 2
+    
+    #Draw new affinity values
+    a0 = G_simul.Bcell_affinity[reactantID]
+    new_affinity1 = affinity_function(a0)
+    new_affinity2 = affinity_function(a0)
+    G_simul.Bcell_affinity[product1.id] = new_affinity1
+    G_simul.Bcell_affinity[product2.id] = new_affinity2
+    
+    cloneID = G_simul.Ancestor[reactantID]
+    G_simul.Ancestor[product1.id] = cloneID
+    G_simul.Ancestor[product2.id] = cloneID
+    
+    product_dict = dict()
+    reactant_dict = dict()
+    reactant_dict[reactantID] = 'Bdiv'
+    product_dict[product1.id] = 'B'
+    product_dict[product2.id] = 'B'
+
+    return reactant_dict, product_dict
+    
+    
+def perform_reaction_TBexchange(G_simul, forced_ID = None): #[B1T] + B2 → [B2T] + B1
+    indexB, reactantB = G_simul.get_random_element(G_simul.reactant_list['B'])
+    indexBT, reactantBT = G_simul.get_random_element(G_simul.reactant_list['[BT]'])
+    affinity1 = G_simul.Bcell_affinity[reactantB.id]
+    affinity2 = G_simul.Bcell_affinity[reactantBT.id]
+    
+    
+    product_dict = dict()
+    reactant_dict = dict()
+    if affinity1 > affinity2: #only perform the reaction  if affinity1 is higher than affinity2
+        productB = gil.Reactant(ID = reactantBT.id)
+        productBT = gil.Reactant(ID = reactantB.id)
+        G_simul.reactant_list['[BT]'].pop(indexBT)
+        G_simul.reactant_list['B'].pop(indexB)
+        G_simul.reactant_list['B'].append(productB)
+        G_simul.reactant_list['[BT]'].append(productBT)
+        
+        reactant_dict[reactantB.id] = 'B'
+        reactant_dict[reactantBT.id] = '[BT]'
+        product_dict[productB.id] = 'B'
+        product_dict[productBT.id] = '[BT]'
+        
+    return reactant_dict, product_dict
+        
+def perform_reaction_TBbinding(G_simul, forced_ID = None): #B + T -> [BT]
+    indexB, reactantB = G_simul.get_random_element(G_simul.reactant_list['B'])
+    indexT, reactantT = G_simul.get_random_element(G_simul.reactant_list['T'])
+    
+    productBT = gil.Reactant(ID = reactantB.id)
+    G_simul.reactant_list['B'].pop(indexB)
+    G_simul.reactant_list['T'].pop(indexT)
+    G_simul.reactant_list['[BT]'].append(productBT)
+    
+    G_simul.reactant_population['B'] -= 1
+    G_simul.reactant_population['T'] -= 1
+    G_simul.reactant_population['[BT]'] += 1
+    
+    product_dict = dict()
+    reactant_dict = dict()
+    reactant_dict[reactantB.id] = 'B'
+    reactant_dict[reactantT.id] = 'T'
+    product_dict[productBT.id] = '[BT]'
+
+    return reactant_dict, product_dict
+        
+        
+def perform_reaction_TBunbinding(G_simul, forced_ID = None): #[BT] -> Bdiv + T
+    
+    if forced_ID is None:
+        index, reactant = G_simul.get_random_element(G_simul.reactant_list['[BT]'])
+        reactantID = reactant.id
+    else:
+        index = G_simul.find_in_reactant_list(G_simul.reactant_list['[BT]'], forced_ID)
+        reactantID = forced_ID
+        
+    productB = gil.Reactant(ID = reactantID)
+    productT = gil.Reactant()
+    
+    G_simul.reactant_list['[BT]'].pop(index)
+    G_simul.reactant_list['T'].append(productT)
+    G_simul.reactant_list['Bdiv'].append(productB)
+    
+    G_simul.reactant_population['[BT]'] -= 1
+    G_simul.reactant_population['T'] += 1
+    G_simul.reactant_population['Bdiv'] += 1
+    
+    product_dict = dict()
+    reactant_dict = dict()
+    reactant_dict[reactantID] = '[BT]'
+    product_dict[productB.id] = 'Bdiv'
+    product_dict[productT.id] = 'T'
+
+    return reactant_dict, product_dict
+                          
+
+
+def build_simulation():
+    """Create the germinal center model: reaction channels, initial population and the
+    per-cell attribute maps (affinity and clone of origin) used by the custom reactions."""
+    reaction_channel_list = []
+    
+    
+    channel = gil.Reaction_channel(param,
+                                   rate = rdeath, 
+                                   shape_param = 0.1, 
+                                   distribution = 'logNormal', 
+                                   name = 'B -> 0', 
+                                   precompute_delay = True, 
+                                   reactants = ['B'], 
+                                   products = []
+                                   )
+    reaction_channel_list.append(channel)
+    
+    
+    channel = gil.Reaction_channel(param,
+                                   rate = rdiv, 
+                                   shape_param = 0.1, 
+                                   distribution = 'logNormal', 
+                                   name = 'Bdiv -> B + B', 
+                                   precompute_delay = True, 
+                                   perform_reaction_custom = perform_reaction_division,
+                                   reactants = ['Bdiv'], 
+                                   products = ['B', 'B']
+                                   )
+    reaction_channel_list.append(channel)
+    
+    
+    
+    channel = gil.Reaction_channel(param,
+                                   rate = rbind, 
+                                   distribution = 'exponential', 
+                                   name = 'B + T -> [BT]', 
+                                   perform_reaction_custom = perform_reaction_TBbinding,
+                                   reactants = ['B', 'T'], 
+                                   products = ['[BT]']
+                                   )
+    reaction_channel_list.append(channel)
+    
+    
+
+    channel = gil.Reaction_channel(param,
+                                   rate = rinteract,
+                                   shape_param = 4,
+                                   distribution = 'Gamma', 
+                                   name = '[BT] -> Bdiv + T', 
+                                   perform_reaction_custom = perform_reaction_TBunbinding,
+                                   precompute_delay = True, 
+                                   reactants = ['[BT]'], 
+                                   products = ['Bdiv', 'T']
+                                   )
+    reaction_channel_list.append(channel)
+    
+    
+    
+    channel = gil.Reaction_channel(param,
+                                   rate = rbind,
+                                   shape_param = 4,
+                                   distribution = 'exponential', 
+                                   perform_reaction_custom = perform_reaction_TBexchange,
+                                   name = '[B1T] + B2 → [B2T] + B1', 
+                                   reactants = ['B', '[BT]'], 
+                                   products = ['B', '[BT]']
+                                   )
+    reaction_channel_list.append(channel)
+    
+    
+    
+    
+    
+    #initialise the Gillespie simulation
+    G_simul = gil.Gillespie_simulation(N_init,param, reaction_channel_list, print_warnings = True)
+    
+    #Here you can create and initialise any map that you will use in your function below
+    G_simul.Bcell_affinity = dict()
+    G_simul.Ancestor = dict()
+    G_simul.ancestor_dict = dict()
+    return G_simul
+
+
 def main():    
     
     
@@ -92,201 +289,10 @@ def main():
     
     
     
-    def perform_reaction_division(G_simul, forced_ID = None): #Bdiv -> B + B
-        
-        if forced_ID is None:
-            index, reactant = G_simul.get_random_element(G_simul.reactant_list['Bdiv'])
-            reactantID = reactant.id
-        else:
-            index = G_simul.find_in_reactant_list(G_simul.reactant_list['Bdiv'], forced_ID) #Really need to optimize this function
-            reactantID = forced_ID
-                    
-        #update populations
-        product1 = gil.Reactant()
-        product2 = gil.Reactant()
-        G_simul.reactant_list['Bdiv'].pop(index)
-        G_simul.reactant_population['Bdiv'] -= 1
-        G_simul.reactant_list['B'].append(product1)
-        G_simul.reactant_list['B'].append(product2)
-        G_simul.reactant_population['B'] += 2
-        
-        #Draw new affinity values
-        a0 = G_simul.Bcell_affinity[reactantID]
-        new_affinity1 = affinity_function(a0)
-        new_affinity2 = affinity_function(a0)
-        G_simul.Bcell_affinity[product1.id] = new_affinity1
-        G_simul.Bcell_affinity[product2.id] = new_affinity2
-        
-        cloneID = G_simul.Ancestor[reactantID]
-        G_simul.Ancestor[product1.id] = cloneID
-        G_simul.Ancestor[product2.id] = cloneID
-        
-        product_dict = dict()
-        reactant_dict = dict()
-        reactant_dict[reactantID] = 'Bdiv'
-        product_dict[product1.id] = 'B'
-        product_dict[product2.id] = 'B'
-    
-        return reactant_dict, product_dict
-        
-        
-    def perform_reaction_TBexchange(G_simul, forced_ID = None): #[B1T] + B2 → [B2T] + B1
-        indexB, reactantB = G_simul.get_random_element(G_simul.reactant_list['B'])
-        indexBT, reactantBT = G_simul.get_random_element(G_simul.reactant_list['[BT]'])
-        affinity1 = G_simul.Bcell_affinity[reactantB.id]
-        affinity2 = G_simul.Bcell_affinity[reactantBT.id]
-        
-        
-        product_dict = dict()
-        reactant_dict = dict()
-        if affinity1 > affinity2: #only perform the reaction  if affinity1 is higher than affinity2
-            productB = gil.Reactant(ID = reactantBT.id)
-            productBT = gil.Reactant(ID = reactantB.id)
-            G_simul.reactant_list['[BT]'].pop(indexBT)
-            G_simul.reactant_list['B'].pop(indexB)
-            G_simul.reactant_list['B'].append(productB)
-            G_simul.reactant_list['[BT]'].append(productBT)
-            
-            reactant_dict[reactantB.id] = 'B'
-            reactant_dict[reactantBT.id] = '[BT]'
-            product_dict[productB.id] = 'B'
-            product_dict[productBT.id] = '[BT]'
-            
-        return reactant_dict, product_dict
-            
-    def perform_reaction_TBbinding(G_simul, forced_ID = None): #B + T -> [BT]
-        indexB, reactantB = G_simul.get_random_element(G_simul.reactant_list['B'])
-        indexT, reactantT = G_simul.get_random_element(G_simul.reactant_list['T'])
-        
-        productBT = gil.Reactant(ID = reactantB.id)
-        G_simul.reactant_list['B'].pop(indexB)
-        G_simul.reactant_list['T'].pop(indexT)
-        G_simul.reactant_list['[BT]'].append(productBT)
-        
-        G_simul.reactant_population['B'] -= 1
-        G_simul.reactant_population['T'] -= 1
-        G_simul.reactant_population['[BT]'] += 1
-        
-        product_dict = dict()
-        reactant_dict = dict()
-        reactant_dict[reactantB.id] = 'B'
-        reactant_dict[reactantT.id] = 'T'
-        product_dict[productBT.id] = '[BT]'
-    
-        return reactant_dict, product_dict
-            
-            
-    def perform_reaction_TBunbinding(G_simul, forced_ID = None): #[BT] -> Bdiv + T
-        
-        if forced_ID is None:
-            index, reactant = G_simul.get_random_element(G_simul.reactant_list['[BT]'])
-            reactantID = reactant.id
-        else:
-            index = G_simul.find_in_reactant_list(G_simul.reactant_list['[BT]'], forced_ID)
-            reactantID = forced_ID
-            
-        productB = gil.Reactant(ID = reactantID)
-        productT = gil.Reactant()
-        
-        G_simul.reactant_list['[BT]'].pop(index)
-        G_simul.reactant_list['T'].append(productT)
-        G_simul.reactant_list['Bdiv'].append(productB)
-        
-        G_simul.reactant_population['[BT]'] -= 1
-        G_simul.reactant_population['T'] += 1
-        G_simul.reactant_population['Bdiv'] += 1
-        
-        product_dict = dict()
-        reactant_dict = dict()
-        reactant_dict[reactantID] = '[BT]'
-        product_dict[productB.id] = 'Bdiv'
-        product_dict[productT.id] = 'T'
-    
-        return reactant_dict, product_dict
-                              
-
-    
-
     all_max_pop = []
     for ni in range(Nsim):    
         print('Simulation %s/%s' % (ni+1, Nsim))
-        reaction_channel_list = []
-        
-        
-        channel = gil.Reaction_channel(param,
-                                       rate = rdeath, 
-                                       shape_param = 0.1, 
-                                       distribution = 'logNormal', 
-                                       name = 'B -> 0', 
-                                       precompute_delay = True, 
-                                       reactants = ['B'], 
-                                       products = []
-                                       )
-        reaction_channel_list.append(channel)
-        
-        
-        channel = gil.Reaction_channel(param,
-                                       rate = rdiv, 
-                                       shape_param = 0.1, 
-                                       distribution = 'logNormal', 
-                                       name = 'Bdiv -> B + B', 
-                                       precompute_delay = True, 
-                                       perform_reaction_custom = perform_reaction_division,
-                                       reactants = ['Bdiv'], 
-                                       products = ['B', 'B']
-                                       )
-        reaction_channel_list.append(channel)
-        
-        
-        
-        channel = gil.Reaction_channel(param,
-                                       rate = rbind, 
-                                       distribution = 'exponential', 
-                                       name = 'B + T -> [BT]', 
-                                       perform_reaction_custom = perform_reaction_TBbinding,
-                                       reactants = ['B', 'T'], 
-                                       products = ['[BT]']
-                                       )
-        reaction_channel_list.append(channel)
-        
-        
-    
-        channel = gil.Reaction_channel(param,
-                                       rate = rinteract,
-                                       shape_param = 4,
-                                       distribution = 'Gamma', 
-                                       name = '[BT] -> Bdiv + T', 
-                                       perform_reaction_custom = perform_reaction_TBunbinding,
-                                       precompute_delay = True, 
-                                       reactants = ['[BT]'], 
-                                       products = ['Bdiv', 'T']
-                                       )
-        reaction_channel_list.append(channel)
-        
-        
-        
-        channel = gil.Reaction_channel(param,
-                                       rate = rbind,
-                                       shape_param = 4,
-                                       distribution = 'exponential', 
-                                       perform_reaction_custom = perform_reaction_TBexchange,
-                                       name = '[B1T] + B2 → [B2T] + B1', 
-                                       reactants = ['B', '[BT]'], 
-                                       products = ['B', '[BT]']
-                                       )
-        reaction_channel_list.append(channel)
-        
-        
-        
-        
-        
-        #initialise the Gillespie simulation
-        G_simul = gil.Gillespie_simulation(N_init,param, reaction_channel_list, print_warnings = True)
-        
-        #Here you can create and initialise any map that you will use in your function below
-        G_simul.Bcell_affinity = dict()
-        G_simul.Ancestor = dict()
-        G_simul.ancestor_dict = dict()
+        G_simul = build_simulation()
         
         #run multiple Gillespie simulationand average them
         G_simul.run_simulations(param.Tend, delay_method = 'Standard')

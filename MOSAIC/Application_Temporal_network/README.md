@@ -38,7 +38,7 @@ package for the community diversity metric.
 
 | File | Model |
 |---|---|
-| `lib_MOSAIC_IP_model.py` | MOSAIC-TN. `case='Basic'` is MOSAIC-TN A, `case='first_order'` is MOSAIC-TN B (memory of first-order acquaintances), `case='second_order'` adds friends of friends, `use_IP=True` adds individual activity levels. |
+| `lib_MOSAIC_IP_model.py` | MOSAIC-TN (`simulate_temporal_network`). `case='Basic'` is MOSAIC-TN A, `case='first_order'` is MOSAIC-TN B (memory of first-order acquaintances), `case='second_order'` adds friends of friends, `use_IP=True` adds individual activity levels. The model parameters are in the `PARAMETERS` dict at the top of the file. |
 | `lib_Spanning_tree.py` | spanning-tree baseline (requires `numba`). |
 | `lib_ADM.py` | activity-driven model baseline. The simulations were generated with [Didier Le Bail's code](https://github.com/DidierLeBail/Temporal-networks-PhD-code); only the precomputed results are included here. |
 

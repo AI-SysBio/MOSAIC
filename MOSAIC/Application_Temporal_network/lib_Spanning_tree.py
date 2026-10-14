@@ -1,3 +1,16 @@
+"""
+Spanning-tree temporal network generator, used as a baseline for MOSAIC-TN in the paper.
+
+The model grows a static Barabasi-Albert topology, computes a spanning tree rooted at a
+random node and generates interactions by propagating activity along the tree with
+power-law distributed waiting times (see the Methods of the paper for the parameters).
+``run_Spanning_tree_simulation(N, Tend)`` is the entry point used by
+``Benchmarking_time.py``; it regenerates the topology and the trajectory for every call
+and stores intermediate arrays in ``Temp/``. The heavy loops are compiled with numba.
+
+This baseline was provided by the co-authors of the paper and is kept as used for the
+published comparison.
+"""
 import networkx as nx 
 import numpy as np
 from numba import njit
