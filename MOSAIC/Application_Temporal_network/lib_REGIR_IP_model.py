@@ -80,16 +80,21 @@ def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
     for ni in range(N):
         next_interaction_type_dict[ni] = []
     All_interactions = [] #storing all the interactions
-    inter_event_times = [] #just for tracking inter-event times
+    inter_event_times = [] #just for tracking node inter duration
     interaction_times = []
+    edge_interduration = [] #just for tracking edge interduration
     Aggregated_Network = np.zeros((N,N))
     
     
     
     #Simulation temporary variables
     Dt_reactant_time = dict()
+    Dt_edge_time = dict()
     for i in range(N):
         Dt_reactant_time[i] = 0
+        for j in range(N):
+            interact_id = getID(i,j)
+            Dt_edge_time[interact_id] = 0
     t = 0
     Interaction_end = SortedDict()
     Interaction_end[1000000000000000000000000000] = [-1,-1]
@@ -159,6 +164,7 @@ def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
             #4 -  Compute their interaction rate
             ti = t - Dt_reactant_time[i]
             tj = t - Dt_reactant_time[j]
+            tij = t - Dt_reactant_time[j]
             rate_i = rate_function(ti, r0 = rAA, shape_param = alphaAA)
             rate_j = rate_function(tj, r0 = rAA, shape_param = alphaAA)
             all_rates = [rate_function(t - Dt_reactant_time[k], r0 = rAA, shape_param = alphaAA) for k in range(N)]
@@ -176,6 +182,8 @@ def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
                 Dt_reactant_time[j] = t
                 
                 interact_id = getID(i,j)
+                edge_interduration.append(Dt_edge_time[interact_id])
+                Dt_edge_time[interact_id] = t
                 
                 if interact_id not in Currently_interacting:
                     
@@ -326,6 +334,7 @@ def run_REGIR_simulation(N, Tend = 2000, case = 'Basic', use_IP = False):
         all_results = dict()
         all_results['Interacting_time'] = np.array(interaction_times)
         all_results['Non_interacting_time'] = np.array(inter_event_times)
+        all_results['Edge_interduration'] = np.array(edge_interduration)
         #all_results['Network'] = logNetwork[nsorted,:][:,nsorted]
         all_results['Interactions'] = number_of_interactions
         all_results['Friends'] = prop_of_friends*N

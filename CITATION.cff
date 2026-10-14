@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the Nature Communications article below."
+title: "MOSAIC: Scalable Stochastic Simulation with Heterogeneous and Non-Markovian Agents"
+type: software
+license: MIT
+repository-code: "https://github.com/AI-SysBio/MOSAIC"
+authors:
+  - family-names: Pélissier
+    given-names: Aurélien
+preferred-citation:
+  type: article
+  title: "Unifying non-Markovian dynamics and agent heterogeneity in scalable stochastic networks"
+  authors:
+    - family-names: Pélissier
+      given-names: Aurélien
+    - family-names: Phan
+      given-names: Miroslav
+    - family-names: Le Bail
+      given-names: Didier
+    - family-names: Beerenwinkel
+      given-names: Niko
+    - family-names: Rodríguez Martínez
+      given-names: María
+  journal: "Nature Communications"
+  volume: 17
+  issue: 1
+  start: 3345
+  year: 2026
+  doi: "10.1038/s41467-026-69817-y"

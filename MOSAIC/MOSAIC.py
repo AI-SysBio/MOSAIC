@@ -1,3 +1,22 @@
+"""
+MOSAIC: scalable stochastic simulation with heterogeneous and non-Markovian agents.
+
+Core implementation of the rejection-based Gillespie algorithm for non-Markovian
+reactions (originally named REGIR) described in
+
+    Pelissier et al., "Unifying non-Markovian dynamics and agent heterogeneity in
+    scalable stochastic networks", Nature Communications 17, 3345 (2026).
+    https://doi.org/10.1038/s41467-026-69817-y
+
+Each reaction channel is defined by a rate (1/mean inter-event time), a shape
+parameter and a waiting-time distribution.  Channels with a single reactant are
+simulated with the rejection method (or with a precomputed delay queue when
+``precompute_delay=True``); channels with zero or several reactants are treated
+as Poisson processes.  See ``Toy_example.py`` and the README for usage.
+
+For a pip-installable, actively maintained implementation of the same method see
+NoMaSS: https://github.com/AI-SysBio/NoMaSS
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -125,10 +144,10 @@ def Cauchy_rate(t, rate,gam):
 
 class Reaction_channel():
     
-    def __init__(self,param_simulation, rate=1, shape_param=1, distribution = 'Weibull', precompute_delay = False, name='', reactants = [], products = [], transfer_identity = False):
+    def __init__(self,param_simulation, rate=1, shape_param=1, distribution = 'Weibull', precompute_delay = False, name='', reactants = None, products = None, transfer_identity = False):
         """ Fixed parameters """
-        self.reactants = reactants #reactant list of str
-        self.products = products #produect list of str
+        self.reactants = list(reactants) if reactants is not None else [] #reactant list of str
+        self.products = list(products) if products is not None else [] #product list of str
         self.rate = rate #reaction rate
         self.shape_param = shape_param #alpha shape parameter of Weibull distribution
         self.name = name
@@ -146,9 +165,7 @@ class Reaction_channel():
         """ Distribution specific parameters """
         
         if rate < 0:
-            print(' Reaction %s:' % name)
-            print('   Rate cannot be negative')
-            sys.exit()
+            raise ValueError('Reaction %s: Rate cannot be negative' % (name,))
             
         elif rate == 0:
             self.distribution = 'Exponential'
@@ -164,12 +181,7 @@ class Reaction_channel():
             self.rate_function = Weibull_rate
             self.rmax_fixed = False
             if shape_param < 1 and precompute_delay == False:
-                print(' Reaction %s:' % name)
-                print('   Shape parameter < 1 for Weiull distribution is')
-                print('   currently not supported in this REGIR implementation')
-                print('   (Only non infinite rate at t=0 are supported)')
-                print('   (Please use precompute_delay = True)')
-                sys.exit()
+                raise ValueError('Reaction %s: Shape parameter < 1 for Weibull distribution is not supported by the rejection method (the rate diverges at t=0); use precompute_delay = True instead' % (name,))
             if shape_param == 1:
                 self.distribution = 'Exponential'
                 self.rate_function = Exponential_rate
@@ -179,12 +191,7 @@ class Reaction_channel():
             self.rate_function = Gamma_rate
             self.rmax_fixed = False
             if shape_param < 1 and precompute_delay == False:
-                print(' Reaction %s:' % name)
-                print('   Shape parameter < 1 for Gamma distribution is')
-                print('   currently not supported in this implementation')
-                print('   (Only non infinite rate at t=0 are supported)')
-                print('   (Please use precompute_delay = True)')
-                sys.exit()
+                raise ValueError('Reaction %s: Shape parameter < 1 for Gamma distribution is not supported by the rejection method (the rate diverges at t=0); use precompute_delay = True instead' % (name,))
             if shape_param == 1:
                 self.distribution = 'Exponential'
                 self.rate_function = Exponential_rate
@@ -194,16 +201,12 @@ class Reaction_channel():
             self.rate_function = Gaussian_rate
             self.rmax_fixed = False
             if shape_param <= 0:
-                print(' Reaction %s:' % name)
-                print('   Zero or negative variance for LogNormal is not supported')
-                sys.exit()
+                raise ValueError('Reaction %s: Zero or negative variance for LogNormal is not supported' % (name,))
                 
         elif distribution.lower() in ['lognormal','lognorm']:
             self.rate_function = Lognormal_rate
             if shape_param <= 0:
-                print(' Reaction %s:' % name)
-                print('   Zero or negative variance for Lognorm is not supported')
-                sys.exit()
+                raise ValueError('Reaction %s: Zero or negative variance for Lognorm is not supported' % (name,))
             elif shape_param >= 0.25:
                 self.rmax_fixed = True
                 t = np.linspace(0,param_simulation.Tend,num=100)
@@ -216,16 +219,13 @@ class Reaction_channel():
             self.rate_function = Cauchy_rate
             self.rmax_fixed = True
             if shape_param <= 0:
-                print(' Reaction %s:' % name)
-                print('   Zero or negative variance for Gaussian is not supported')
-                sys.exit()
+                raise ValueError('Reaction %s: Zero or negative variance for Gaussian is not supported' % (name,))
             else:
                 rate_t = np.array([Cauchy_rate(ti, self.rate, self.shape_param) for ti in np.linspace(0,param_simulation.Tend,num=100)])
                 self.rmax = np.max(rate_t)
 
         else:
-            print('  Unsupported distribution: %s' % distribution)
-            sys.exit()
+            raise ValueError('Unsupported distribution: %s' % (distribution,))
             
         self.temp_rmax = self.rmax #temporary rmax to make sure the Dt<<1 is notviolated
         
@@ -338,10 +338,15 @@ class Gillespie_simulation():
         return reactant_list, reactant_times
     
     
-    def run_simulations(self, Tend, verbose = True, delay_method = 'rejection'):
+    def run_simulations(self, Tend, verbose = True, delay_method = 'rejection', seed = None):
         """
-        Run several Gillespie simulations and plot the results
-        """        
+        Run N_simulations independent realisations and return the recorded populations
+        as an array of shape (N_simulations, timepoints, n_species + 1); the last column
+        is the total population. Pass ``seed`` for reproducible runs.
+        """
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
         
         overlap = False
         self.reactions_list_per_reactant = dict()
@@ -353,7 +358,7 @@ class Gillespie_simulation():
                 self.reactions_list_per_reactant[reactant].append(reaction_chanel)
                 
         for reactant_str in self.reactant_population_init:
-            if len(self.reactions_list_per_reactant[reactant])> 1:
+            if len(self.reactions_list_per_reactant[reactant_str]) > 1:
                 overlap = True
                     
         self.overlapping_reactants = overlap
@@ -362,9 +367,7 @@ class Gillespie_simulation():
         for channel_i in self.reaction_channel_list:
             if len(set(channel_i.products)) < len(channel_i.products):
                 if channel_i.transfer_identity:
-                    print("   WARNING: Setting transfer_identity to True for channels where products are")
-                    print("            of the same kind is ambigious due to duplicated ID in the dictionary") 
-                    sys.exit()
+                    raise ValueError('Setting transfer_identity to True for channels where products are of the same kind is ambiguous due to duplicated IDs in the dictionary')
         
         population = np.empty((self.param.N_simulations, self.param.timepoints, len(self.reactant_population_init)+1))
         for ni in range(self.param.N_simulations):
@@ -452,7 +455,7 @@ class Gillespie_simulation():
         
         for ri,reaction_chanel in enumerate(self.reaction_channel_list):
             if len(reaction_chanel.reactants) > 0:
-                Nreactants = np.product([self.reactant_population[reactant_str] for reactant_str in reaction_chanel.reactants])
+                Nreactants = np.prod([self.reactant_population[reactant_str] for reactant_str in reaction_chanel.reactants])
             else:
                 Nreactants = 1
             N_reactants[ri] = Nreactants
@@ -463,8 +466,7 @@ class Gillespie_simulation():
             if propensity[ri] > 0:
                 ratio = np.sum(propensity)/reaction_chanel.rmax
                 if np.isnan(ratio) or np.isinf(ratio):
-                    print('  Error rmax should never be zero')
-                    sys.exit()
+                    raise RuntimeError('rmax should never be zero: check the reaction rates')
                 if reaction_chanel.precompute_delay:
                     propensity[ri] = 0.00000000000001 #the reaction will always execute when delay is reached anyway
                 elif ratio < self.param.min_ratio and reaction_chanel.distribution != 'Exponential':
@@ -693,7 +695,8 @@ class Gillespie_simulation():
         plt.show()
         
         
-    def plot_populations(self, reactant_list = None, log_scale = False, color_list = [], figsize = (6.2, 4.2)):
+    def plot_populations(self, reactant_list = None, log_scale = False, color_list = None, figsize = (6.2, 4.2)):
+        color_list = list(color_list) if color_list is not None else []
         
         reactant_poplist = list(self.reactant_population_init.keys())
         reactant_poplist.append('Total')

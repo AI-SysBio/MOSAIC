@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import networkx as nx
+import itertools
 import matplotlib.pyplot as plt
 import matplotlib
 import pickle
@@ -18,14 +19,14 @@ distribution (one value per node):
     -> inter-event time
     -> number of unique interactions
     -> total time interacted
-    -> size of the group (TODO)
+    -> size of the group
     
-single point (TODO):
+single point:
     -> aggr. network clustering coefficient nx.average_clustering
     -> aggr. netowrk modularity  
     -> deg_assortativity (what is it?) nx.degree_pearson_correlation_coefficient
     
-ETN vectors (TODO):
+ETN vectors:
     -> vector of the aggr. network
     
     
@@ -52,9 +53,6 @@ All the saved observables are:
 
 G_metric_names = ['modularity', 'mean_diversity', 'degree_assortativity', 'clust_coefficient', 'transitivity', 'density']
 model_name_plot = {'Conf':'Conference', 'Sim_ADM_V9':'AD modeling', "Sim_spanning_tree": 'Spanning Tree', 'Sim_REGIR_Basic':'REGIR-TN A', 'Sim_REGIR_first_order':'REGIR-TN B'}
-#TODO: REGIR Basci 6 more simulations
-#ADM 5 more simulations
-#SPanning tree and ADM run the file processing
 
 def main():
     
@@ -86,6 +84,7 @@ def main():
     #network_list = [network for network in network_list if not any(sub in network for sub in ['_1', '_2', '_3', '_4', '_5', '_6', '_7', '_8', '_9'])]
     interaction_times = []
     inter_event_times = []
+    edge_interdurations = []
     #node_centralities = []
     cc_size = []
     G_metrics = []
@@ -95,12 +94,22 @@ def main():
         npath = 'Data/Networks/' + network_name
         obs_path = npath.replace('.csv', '.pkl')
         network_observable = load_dict(obs_path)
+        if 'Edge_inter_duration' not in network_observable:
+            # observables computed before this metric was added: fill it in from the csv
+            print('Computing edge inter-durations for %s...' % network_name[:-4])
+            network_df = pd.read_csv(npath, sep = ' ', names = ['timestamp', 'N1', 'N2'])
+            network_observable['Edge_inter_duration'] = compute_edge_interdurations(network_df)
+            save_dict(network_observable, obs_path)
         inter_time = network_observable['Interacting_time']
         inter_time = [max(1,time) for time in inter_time]
         interaction_times.append(inter_time)
         non_inter_time = network_observable['Non_interacting_time']
         non_inter_time = [max(1,time) for time in non_inter_time]
         inter_event_times.append(non_inter_time)
+        edge_inter = network_observable['Edge_inter_duration']
+        edge_inter = [max(1,time) for time in edge_inter]
+        edge_interdurations.append(edge_inter)
+      
         #node_centralities.append(network_observable['Node_centralities'])
         cc_size.append(network_observable['cc_size'])
         G_metrics.append(network_observable['G_metrics'])
@@ -115,9 +124,9 @@ def main():
             color_dict[network_name] = 'purple'
         
 
-
+    #Node Interduration
     x,y,bins = get_log_pdf(inter_event_times[0])
-    plt.figure(figsize = (4,4))
+    plt.figure(figsize = (3,4))
     plt.scatter(x, y, label="Conference", alpha=1, color = 'red', zorder = 10)
     if plot_edges:
         plt.plot(x, y, alpha=1, ls = '--', color = 'red', zorder = 10)
@@ -134,15 +143,61 @@ def main():
     plt.ylabel("PDF")
     plt.xscale("log")
     plt.yscale("log")
-    plt.title('Node Interduration', fontsize = 18)
-    plt.xlim(0.5, 1e5)
+    plt.title('Node interduration', fontsize = 18)
+    plt.xticks([1,100,10000])
+    plt.xlim(0.5, 1e4)
     plt.ylim(1e-8, 1e1)
     #plt.legend(fontsize = 16)
     plt.show()
     
+    x0, y0, bins = get_log_pdf(inter_event_times[0])
+    mask = y0 > 0
+    logx = np.log10(x0[mask])
+    logy = np.log10(y0[mask])
+    b, a = np.polyfit(logx, logy, 1)
+    alpha = -b-1
+    print(f"Estimated alpha (P(T) ∝ T^-alpha) = {alpha:.3f}")
     
+    
+    #Edge interduration
+    x,y,bins = get_log_pdf(edge_interdurations[0])
+    plt.figure(figsize = (3,4))
+    plt.scatter(x, y, label="Conference", alpha=1, color = 'red', zorder = 10)
+    if plot_edges:
+        plt.plot(x, y, alpha=1, ls = '--', color = 'red', zorder = 10)
+    for mi in range(1, n_networks):
+        n_name = network_list[mi]
+        x,y,_ = get_log_pdf(edge_interdurations[mi], forced_bins = bins)
+        if '_0' in n_name:
+            plt.scatter(x, y, color = color_dict[n_name], label = model_name_plot[n_name[:-6]], alpha=1, marker = 'x')
+        else:
+            plt.scatter(x, y, color = color_dict[n_name], alpha=1, marker = 'x')
+        if plot_edges:
+            plt.plot(x, y, color = color_dict[n_name], alpha=1, ls = '--')
+    plt.xlabel("Time")
+    plt.ylabel("PDF")
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.xticks([1,100,10000])
+    plt.xlim(0.5, 1e4)
+    plt.ylim(1e-8, 1e1)
+    plt.title('Edge interduration', fontsize = 18)
+    #plt.legend(fontsize = 10)
+    plt.show()
+    
+    x0, y0, bins = get_log_pdf(edge_interdurations[0])
+    mask = y0 > 0
+    logx = np.log10(x0[mask])
+    logy = np.log10(y0[mask])
+    b, a = np.polyfit(logx, logy, 1)
+    alpha = -b-1
+    print(f"Estimated alpha (P(T) ∝ T^-alpha) = {alpha:.3f}")
+    
+    
+    
+    #Interaction Duration
     x,y,bins = get_log_pdf(interaction_times[0])
-    plt.figure(figsize = (4,4))
+    plt.figure(figsize = (3,4))
     plt.scatter(x, y, label="Conference", alpha=1, color = 'red', zorder = 10)
     if plot_edges:
         plt.plot(x, y, alpha=1, ls = '--', color = 'red', zorder = 10)
@@ -159,14 +214,22 @@ def main():
     plt.ylabel("PDF")
     plt.xscale("log")
     plt.yscale("log")
-    plt.xlim(0.5, 1e3)
+    plt.xlim(0.7, 5e2)
     plt.ylim(1e-8, 1e1)
-    plt.title('Interaction Duration', fontsize = 18)
+    plt.title('Interaction duration', fontsize = 18)
     #plt.legend(fontsize = 10)
     plt.show()
     
+    x0, y0, bins = get_log_pdf(interaction_times[0])
+    mask = y0 > 0
+    logx = np.log10(x0[mask])
+    logy = np.log10(y0[mask])
+    b, a = np.polyfit(logx, logy, 1)
+    alpha = -b-1
+    print(f"Estimated alpha (P(T) ∝ T^-alpha) = {alpha:.3f}")
     
-    if False:
+    
+    if True:
         plot_edges = True
         x,y,bins = get_log_pdf(cc_size[0])
         plt.figure(figsize = (5,5))
@@ -288,6 +351,45 @@ def get_log_pdf(data, forced_bins = None):
     
     return bin_centers, pdf, bins
         
+def compute_edge_interdurations(network_df, t_max=100000):
+    """
+    Edge inter-duration: for every pair of agents, the time elapsed between two
+    consecutive timesteps at which both agents are interacting (with anyone).
+    This is a vectorised replica of the edge bookkeeping in extract_observable
+    (validated to give identical values) and runs in about a second per network.
+    """
+    ts = network_df['timestamp'].to_numpy()
+    n1 = network_df['N1'].to_numpy()
+    n2 = network_df['N2'].to_numpy()
+    keep = ts <= t_max
+    ts, n1, n2 = ts[keep], n1[keep], n2[keep]
+    nA = int(max(n1.max(), n2.max())) + 1
+    u, inv = np.unique(ts, return_inverse=True)
+    active = np.zeros((len(u), nA), dtype=bool)
+    active[inv, n1] = True
+    active[inv, n2] = True
+    if u[0] == 0:
+        grid, S = u, active
+    else:  # the simulation clock starts at 0 with nobody interacting
+        grid = np.concatenate([[0], u])
+        S = np.vstack([np.zeros((1, nA), bool), active])
+    out = []
+    iu, ju = np.triu_indices(nA, k=1)
+    chunk = 2000
+    for c0 in range(0, len(iu), chunk):
+        ii, jj = iu[c0:c0 + chunk], ju[c0:c0 + chunk]
+        both = S[:-1, ii] & S[:-1, jj]
+        for pi in range(both.shape[1]):
+            k = np.nonzero(both[:, pi])[0] + 1
+            if len(k) == 0:
+                continue
+            ends = grid[k - 1]
+            starts = np.concatenate([[0], grid[k[:-1]]])
+            vals = ends - starts
+            out.append(vals[vals > 0])
+    return np.concatenate(out) if out else np.array([])
+
+
 def extract_observable(network_df):
     
     #print(network_df)
@@ -310,7 +412,16 @@ def extract_observable(network_df):
         current_noninteraction_friend_time[ai] = 0
         current_noninteraction_stranger_time[ai] = 0
         current_noninteraction_friend_of_friend_time[ai] = 0
+        
     
+    
+    #print({getID(ai, aj) for ai, aj in itertools.combinations(Agent_IDs, 2)})
+    #sys.exit()
+    
+    Edge_IDs = np.array(sorted({getID(ai, aj) for ai, aj in itertools.combinations(Agent_IDs, 2)}))
+    current_edge_noninteraction_time = dict()
+    for eij in Edge_IDs:
+        current_edge_noninteraction_time[eij] = 0
     
     number_of_friends = np.zeros(nAgents)
     interaction_time_dict = dict()
@@ -322,6 +433,8 @@ def extract_observable(network_df):
     noninteraction_time_friend_dict = dict()
     noninteraction_time_stranger_dict = dict()
     noninteraction_time_friend_of_friend_dict = dict()
+    
+    edge_noninteraction_time_dict = dict()
     cc_size = dict()
     
     
@@ -337,6 +450,9 @@ def extract_observable(network_df):
         noninteraction_time_friend_of_friend_dict[str(agentID)] = []
         noninteraction_time_stranger_dict[str(agentID)] = []
         cc_size[str(agentID)] = []
+        
+    for ei in Edge_IDs:
+        edge_noninteraction_time_dict[str(ei)] = []
     
     
     was_interacting = dict()
@@ -432,9 +548,25 @@ def extract_observable(network_df):
                         if IDj in are_friends_:
                             are_friend_of_friends['%s_%s' % (a1,Aj)] = True
                             are_friend_of_friends['%s_%s' % (Aj,a1)] = True
+                            
+                            
+                            
+            
+            #store edge statistics
+            for ai in Agent_IDs:
+                for aj in Agent_IDs:
+                    if aj > ai:
+                        eij = getID(ai,aj)
+                        if (ai in agent_is_interacting) and (aj in agent_is_interacting):
+                            if current_edge_noninteraction_time[eij] > 0:
+                                if time > t_thresh:
+                                    edge_noninteraction_time_dict[eij].append(current_edge_noninteraction_time[eij])   
+                            current_edge_noninteraction_time[eij] = 0 
+                        else:
+                            current_edge_noninteraction_time[eij] += time_delay
 
 
-                
+            #storing node statistics
             for ai in Agent_IDs:
                 
                 if ai in agent_is_interacting:
@@ -563,6 +695,15 @@ def extract_observable(network_df):
     plt.legend(fontsize=15)
     plt.show()
     
+    all_edge_interdurations = np.concatenate([edge_noninteraction_time_dict[ei] for ei in Edge_IDs])
+    plt.hist(all_edge_interdurations, bins=40, color = 'green', density = True, alpha = 0.5)
+    plt.yscale('log')
+    plt.xlabel('Edge inter-event time')
+    plt.ylabel('Density')
+    plt.xlim(xmin = 0)
+    plt.legend(fontsize=15)
+    plt.show()
+    
     #Node total_number_interaction
     total_number_interaction = np.array([len(interaction_time_dict[ai]) for ai in Agent_IDs])
     plt.hist(total_number_interaction, bins = 30, alpha = 0.5, density = True)
@@ -604,10 +745,14 @@ def extract_observable(network_df):
     plt.colorbar()
     plt.show()
     
-    import cdiversity
     from collections import Counter
-    community_diversity, _ = np.log(cdiversity.diversity_profile(Counter(communities)))
-    mean_diversity = np.mean(community_diversity)
+    try:
+        import cdiversity  # optional: pip install cdiversity
+        community_diversity, _ = np.log(cdiversity.diversity_profile(Counter(communities)))
+        mean_diversity = np.mean(community_diversity)
+    except ImportError:
+        print('   cdiversity not installed: community diversity set to NaN')
+        mean_diversity = np.nan
     
     deg_assortativity = nx.degree_pearson_correlation_coefficient(G)
     clust_coeff = nx.average_clustering(G)
@@ -631,6 +776,7 @@ def extract_observable(network_df):
     network_observable = dict()
     network_observable['Interacting_time'] = np.array(all_interaction_times)
     network_observable['Non_interacting_time'] = np.array(all_noninteraction_times)
+    network_observable['Edge_inter_duration'] = np.array(all_edge_interdurations)
     network_observable['Interactions'] = total_number_interaction
     network_observable['total_interacting_time'] = total_interacting_time
     network_observable['Friends'] = number_of_friends
@@ -643,6 +789,8 @@ def extract_observable(network_df):
     network_observable['G_metrics'] = G_metrics
 
     #network_observable['ETN_vector'] = 0
+    
+    #sys.exit()
     
     return network_observable
         
@@ -707,6 +855,14 @@ def normalize_around_ref(matrix, ref = 0):
     matrix = matrix/np.std(matrix, axis = 0)
     return matrix
 
+
+def getID(i,j):
+    if i > j: #make sure we always have i < j
+        k = i
+        i = j
+        j = k
+    ID = '%s_%s' % (i,j)
+    return ID
     
 
 

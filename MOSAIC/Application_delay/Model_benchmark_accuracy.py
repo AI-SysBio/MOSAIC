@@ -33,8 +33,6 @@ about 22.3 +-  3.1 min
 """
 
 
-#Add dots to the end
-#Correct the cost part
 
 
 recompute_accuracy = False

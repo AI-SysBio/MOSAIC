@@ -1,0 +1,14 @@
+# Core library (MOSAIC/MOSAIC.py)
+numpy>=1.22
+scipy>=1.8
+matplotlib>=3.5
+seaborn>=0.11
+sortedcontainers>=2.4
+
+# Application scripts
+pandas>=1.4
+openpyxl>=3.0        # Application_Immune_response (GC_diversity.xlsx)
+networkx>=2.8        # Application_Temporal_network
+numba>=0.56          # Application_Temporal_network (spanning tree baseline)
+scikit-learn>=1.0    # Application_Temporal_network/Plot_temporal_network.py
+# cdiversity        # optional, only for recompute_observables=True in Compare_networks.py

@@ -149,10 +149,10 @@ def Pareto_rate(t, rate, alpha):
 
 class Reaction_channel():
     
-    def __init__(self,param_simulation, rate=1, shape_param=1, rmax = None, distribution = 'Weibull', precompute_delay = False, name='', reactants = [], products = [], transfer_identity = False, perform_reaction_custom = None, r0_function = None):
+    def __init__(self,param_simulation, rate=1, shape_param=1, rmax = None, distribution = 'Weibull', precompute_delay = False, name='', reactants = None, products = None, transfer_identity = False, perform_reaction_custom = None, r0_function = None):
         """ Fixed parameters """
-        self.reactants = reactants #reactant list of str
-        self.products = products #produect list of str
+        self.reactants = list(reactants) if reactants is not None else [] #reactant list of str
+        self.products = list(products) if products is not None else [] #product list of str
         self.rate = rate #reaction rate
         self.shape_param = shape_param #alpha shape parameter of Weibull distribution
         self.name = name
@@ -179,9 +179,7 @@ class Reaction_channel():
         
         if self.use_custom_function:
             if perform_reaction_custom is None:
-                print(' Reaction %s:' % name)
-                print('   You need to implement your own custom function if you set use_custom_function to True')
-                sys.exit()      
+                raise ValueError('Reaction %s: perform_reaction_custom must be provided when using a custom reaction' % (name,))
                 
             if rmax is None:
                 print(' Reaction %s (Custom function):' % name)
@@ -191,9 +189,7 @@ class Reaction_channel():
         """ Distribution specific parameters """
         
         if rate < 0:
-            print(' Reaction %s:' % name)
-            print('   Rate cannot be negative')
-            sys.exit()
+            raise ValueError('Reaction %s: Rate cannot be negative' % (name,))
             
         elif self.use_custom_function:
             self.rmax_fixed = True       
@@ -213,11 +209,7 @@ class Reaction_channel():
             self.rate_function = Weibull_rate
             self.rmax_fixed = False
             if shape_param < 1:
-                print(' Reaction %s:' % name)
-                print('   Shape parameter < 1 for Weiull distribution is')
-                print('   currently not supported in this implementation')
-                print('   (Only non infinite rate at t=0 are supported)')
-                sys.exit()
+                raise ValueError('Reaction %s: Shape parameter < 1 for Weibull distribution is not supported by the rejection method (the rate diverges at t=0)' % (name,))
             if shape_param == 1:
                 self.distribution = 'Exponential'
                 self.rate_function = Exponential_rate
@@ -227,11 +219,7 @@ class Reaction_channel():
             self.rate_function = Gamma_rate
             self.rmax_fixed = False
             if shape_param < 1:
-                print(' Reaction %s:' % name)
-                print('   Shape parameter < 1 for Gamma distribution is')
-                print('   currently not supported in this implementation')
-                print('   (Only non infinite rate at t=0 are supported)')
-                sys.exit()
+                raise ValueError('Reaction %s: Shape parameter < 1 for Gamma distribution is not supported by the rejection method (the rate diverges at t=0)' % (name,))
             if shape_param == 1:
                 self.distribution = 'Exponential'
                 self.rate_function = Exponential_rate
@@ -241,16 +229,12 @@ class Reaction_channel():
             self.rate_function = Gaussian_rate
             self.rmax_fixed = False
             if shape_param <= 0:
-                print(' Reaction %s:' % name)
-                print('   Zero or negative variance for LogNormal is not supported')
-                sys.exit()
+                raise ValueError('Reaction %s: Zero or negative variance for LogNormal is not supported' % (name,))
                 
         elif distribution.lower() in ['lognormal','lognorm']:
             self.rate_function = Lognormal_rate
             if shape_param <= 0:
-                print(' Reaction %s:' % name)
-                print('   Zero or negative variance for Lognorm is not supported')
-                sys.exit()
+                raise ValueError('Reaction %s: Zero or negative variance for Lognorm is not supported' % (name,))
             elif shape_param >= 0.25:
                 self.rmax_fixed = True
                 t = np.linspace(0,param_simulation.Tend,num=100)
@@ -263,9 +247,7 @@ class Reaction_channel():
             self.rate_function = Cauchy_rate
             self.rmax_fixed = True
             if shape_param <= 0:
-                print(' Reaction %s:' % name)
-                print('   Zero or negative variance for Cauchy is not supported')
-                sys.exit()
+                raise ValueError('Reaction %s: Zero or negative variance for Cauchy is not supported' % (name,))
             else:
                 rate_t = np.array([Cauchy_rate(ti, self.rate, self.shape_param) for ti in np.linspace(0,param_simulation.Tend,num=100)])
                 self.rmax = np.max(rate_t)
@@ -274,17 +256,14 @@ class Reaction_channel():
             self.rate_function = Pareto_rate
             self.rmax_fixed = True
             if shape_param <= 0:
-                print(' Reaction %s:' % name)
-                print('   Zero or negative shape parameter for Pareto is not supported')
-                sys.exit()
+                raise ValueError('Reaction %s: Zero or negative shape parameter for Pareto is not supported' % (name,))
             else:
                 t0 = 1/rate* 2**(-1/shape_param)
                 self.rmax = shape_param/t0
                       
 
         else:
-            print('  Unsupported distribution: %s' % distribution)
-            sys.exit()
+            raise ValueError('Unsupported distribution: %s' % (distribution,))
             
         self.temp_rmax = self.rmax #temporary rmax to make sure the Dt<<1 is notviolated
         
@@ -434,9 +413,7 @@ class Gillespie_simulation():
         for channel_i in self.reaction_channel_list:
             if len(set(channel_i.products)) < len(channel_i.products):
                 if channel_i.transfer_identity:
-                    print("   WARNING: Setting transfer_identity to True for channels where products are")
-                    print("            of the same kind is ambigious due to duplicated ID in the dictionary") 
-                    sys.exit()
+                    raise ValueError('Setting transfer_identity to True for channels where products are of the same kind is ambiguous due to duplicated IDs in the dictionary')
         
         population = np.empty((self.param.N_simulations, self.param.timepoints, len(self.reactant_population_init)+1))
         for ni in range(self.param.N_simulations):
@@ -575,7 +552,7 @@ class Gillespie_simulation():
                     NA = self.reactant_population[reactant_str]
                     Nreactants = NA*(NA-1)/2
                 else:
-                    Nreactants = np.product([self.reactant_population[reactant_str] for reactant_str in reaction_channel.reactants])
+                    Nreactants = np.prod([self.reactant_population[reactant_str] for reactant_str in reaction_channel.reactants])
             else:
                 Nreactants = 1
             N_reactants[ri] = Nreactants
@@ -586,8 +563,7 @@ class Gillespie_simulation():
             if propensity[ri] > 0:
                 ratio = np.sum(propensity)/reaction_channel.rmax
                 if np.isnan(ratio) or np.isinf(ratio):
-                    print('  Error rmax should never be zero')
-                    sys.exit()
+                    raise RuntimeError('rmax should never be zero: check the reaction rates')
                 if reaction_channel.precompute_delay:
                     propensity[ri] = 0.00000000000001 #the reaction will always execute when delay is reached anyway
                 elif ratio < self.param.min_ratio and reaction_channel.distribution != 'Exponential':
@@ -646,9 +622,7 @@ class Gillespie_simulation():
                 reaction_channel.number_of_rejected_reactions += 1
                 
                 if len(reaction_channel.reactants) == 1 and force_reaction == True:
-                    print('Error: a delayed reaction cannot be rejected,')
-                    print('you need to adjust your custom function to always execute the reaction at the end of the delay')
-                    sys.exit()
+                    raise RuntimeError('A delayed reaction cannot be rejected: you need to adjust your custom function to always execute the reaction at the end of the delay')
                     
             else:
                 
@@ -883,7 +857,8 @@ class Gillespie_simulation():
         plt.show()
         
         
-    def plot_populations(self, reactant_list = None, log_scale = False, color_list = [], figsize = (6.2, 4.2)):
+    def plot_populations(self, reactant_list = None, log_scale = False, color_list = None, figsize = (6.2, 4.2)):
+        color_list = list(color_list) if color_list is not None else []
         
         reactant_poplist = list(self.reactant_population_init.keys())
         reactant_poplist.append('Total')

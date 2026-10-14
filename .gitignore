@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# MOSAIC: generated / extracted data
+MOSAIC/Application_Temporal_network/Data/
+MOSAIC/Application_Temporal_network/Temp/
+MOSAIC/Application_Temporal_network/Spanning_Trees/
+*.pyc
+
+# GitHub workflows (kept local)
+.github/

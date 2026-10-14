@@ -80,7 +80,6 @@ def main():
     plt.ylim(0,1)
     plt.show()
     
-    sys.exit()
 
     
     
