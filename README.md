@@ -3,6 +3,7 @@
 [![Paper](https://img.shields.io/badge/Nature%20Communications-10.1038%2Fs41467--026--69817--y-blue)](https://doi.org/10.1038/s41467-026-69817-y)
 [![arXiv](https://img.shields.io/badge/arXiv-2212.05059-b31b1b)](https://arxiv.org/abs/2212.05059)
 [![HAL](https://img.shields.io/badge/HAL-hal--05763067-lightgrey)](https://hal.science/hal-05763067)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18346964.svg)](https://doi.org/10.5281/zenodo.18346964)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <img align="right" src="Figures/MOSAIC.png" width="380">

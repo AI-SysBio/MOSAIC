@@ -1,0 +1,63 @@
+{
+  "title": "MOSAIC: Scalable Stochastic Simulation with Heterogeneous and Non-Markovian Agents",
+  "upload_type": "software",
+  "description": "<p><strong>If you use this code, please cite the article:</strong> Pélissier A., Phan M., Le Bail D., Beerenwinkel N., Rodríguez Martínez M. Unifying non-Markovian dynamics and agent heterogeneity in scalable stochastic networks. Nature Communications 17, 3345 (2026). <a href=\"https://doi.org/10.1038/s41467-026-69817-y\">https://doi.org/10.1038/s41467-026-69817-y</a></p><p>Reference implementation of MOSAIC, a Gillespie-type framework for the exact simulation of stochastic systems with arbitrary inter-event time distributions (non-Markovian reactions), agent-specific rates and properties, and history-dependent interaction preferences.</p><p>The archive contains the core library and the code, data and precomputed results for the three applications of the paper: transcription with heterogeneous delays, clonal B cell competition in germinal centers, and bursty human interactions in temporal networks (MOSAIC-TN).</p><p>Latest code: <a href=\"https://github.com/AI-SysBio/MOSAIC\">https://github.com/AI-SysBio/MOSAIC</a></p>",
+  "creators": [
+    {
+      "name": "Pélissier, Aurélien",
+      "affiliation": "IBM Research Europe; Department of Biosystems Science and Engineering, ETH Zurich; Institute of Computational Life Sciences, Zurich University of Applied Sciences (ZHAW)",
+      "orcid": "0000-0001-6638-5829"
+    },
+    {
+      "name": "Phan, Miroslav",
+      "affiliation": "IBM Research Europe; Department of Biosystems Science and Engineering, ETH Zurich",
+      "orcid": "0000-0002-7525-2988"
+    },
+    {
+      "name": "Le Bail, Didier",
+      "affiliation": "Centre de Physique Théorique (CPT), Aix-Marseille University, CNRS"
+    },
+    {
+      "name": "Beerenwinkel, Niko",
+      "affiliation": "Department of Biosystems Science and Engineering, ETH Zurich",
+      "orcid": "0000-0002-0573-6119"
+    },
+    {
+      "name": "Rodríguez Martínez, María",
+      "affiliation": "IBM Research Europe; Department of Biomedical Informatics & Data Science, Yale School of Medicine",
+      "orcid": "0000-0003-3766-4233"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "stochastic simulation",
+    "Gillespie algorithm",
+    "non-Markovian dynamics",
+    "agent heterogeneity",
+    "temporal networks",
+    "systems biology"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.1038/s41467-026-69817-y",
+      "relation": "isSupplementTo",
+      "resource_type": "publication-article",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "arXiv:2212.05059",
+      "relation": "isSupplementTo",
+      "resource_type": "publication-preprint",
+      "scheme": "arxiv"
+    },
+    {
+      "identifier": "https://github.com/AI-SysBio/MOSAIC",
+      "relation": "isSupplementTo",
+      "resource_type": "software",
+      "scheme": "url"
+    }
+  ],
+  "references": [
+    "Pélissier A., Phan M., Le Bail D., Beerenwinkel N., Rodríguez Martínez M. Unifying non-Markovian dynamics and agent heterogeneity in scalable stochastic networks. Nature Communications 17, 3345 (2026). https://doi.org/10.1038/s41467-026-69817-y"
+  ]
+}

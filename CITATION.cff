@@ -4,9 +4,22 @@ title: "MOSAIC: Scalable Stochastic Simulation with Heterogeneous and Non-Markov
 type: software
 license: MIT
 repository-code: "https://github.com/AI-SysBio/MOSAIC"
+doi: "10.5281/zenodo.18346964"
 authors:
   - family-names: Pélissier
     given-names: Aurélien
+    orcid: "https://orcid.org/0000-0001-6638-5829"
+  - family-names: Phan
+    given-names: Miroslav
+    orcid: "https://orcid.org/0000-0002-7525-2988"
+  - family-names: Le Bail
+    given-names: Didier
+  - family-names: Beerenwinkel
+    given-names: Niko
+    orcid: "https://orcid.org/0000-0002-0573-6119"
+  - family-names: Rodríguez Martínez
+    given-names: María
+    orcid: "https://orcid.org/0000-0003-3766-4233"
 preferred-citation:
   type: article
   title: "Unifying non-Markovian dynamics and agent heterogeneity in scalable stochastic networks"
